@@ -1,0 +1,9 @@
+{
+    "require": {
+        "slim/slim": "2.3.5",
+        "escapestudios/symfony2-coding-standard": "~2.0" 
+    },
+    "autoload": {
+        "psr-4": {"TinyMediaCenter\\": "classes/"}
+    }
+}
