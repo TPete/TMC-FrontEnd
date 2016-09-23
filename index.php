@@ -7,219 +7,12 @@ use TinyMediaCenter\FrontEnd;
 
 $app = new Slim\Slim(['templates.path' => 'templates/']);
 
-$host   = getHost();
-$config = getConfig();
+$host = FrontEnd\Util::getHost();
+$config = FrontEnd\Util::getConfig();
 
-$api    = new FrontEnd\RestApi($config["restUrl"]);
+$api = new FrontEnd\RestApi($config["restUrl"]);
 
-/**
- * @return string
- */
-function getHost()
-{
-    $dir = $_SERVER["SCRIPT_NAME"];
-    $dir = substr($dir, 0, strrpos($dir, "/"));
-    $host = $_SERVER["HTTP_HOST"].$dir;
-
-    return $host;
-}
-
-/**
- * @return array
- */
-function getConfig()
-{
-    $config = readJSONFile("config.json");
-
-    return $config;
-}
-
-/**
- * @param string $file
- *
- * @return array
- */
-function readJSONFile($file)
-{
-    $fileData = file_get_contents($file);
-    if (!mb_check_encoding($fileData, 'UTF-8')) {
-        $fileData = utf8_encode($fileData);
-    }
-    $res = json_decode($fileData, true);
-
-    return $res;
-}
-
-/**
- * @param string $file
- * @param mixed  $data
- *
- * @return bool
- */
-function writeJSONFile($file, $data)
-{
-    $json = json_encode($data);
-    $res = file_put_contents($file, $json);
-
-    return ($res !== false);
-}
-
-/**
- * @param mixed  $var
- * @param string $default
- * @param bool   $toInt
- *
- * @return int|string
- */
-function initGET($var, $default = "", $toInt = false)
-{
-    $res = isset($_GET[$var]) ? $_GET[$var] : $default;
-    $res = trim($res);
-    if ($toInt) {
-        $res = intval($res, 10);
-    }
-
-    return $res;
-}
-
-/**
- * @param int    $offset
- * @param int    $cnt
- * @param string $sort
- * @param string $filter
- * @param array  $genres
- * @param int    $collection
- * @param int    $list
- *
- * @return array
- */
-function getPreviousLink($offset, $cnt, $sort, $filter, $genres, $collection, $list)
-{
-    if ($offset > 0) {
-        $offsetPrev = $offset - $cnt;
-        if ($offsetPrev < 0) {
-            $offsetPrev = 0;
-        }
-        if ($collection === 0 and $list === 0) {
-            $tmp = [
-                "sort" => $sort,
-                "filter" => $filter,
-                "genres" => $genres,
-                "offset" => $offsetPrev,
-            ];
-        } else {
-            if ($collection > 0) {
-                $tmp = [
-                    "collection" => $collection,
-                    "offset" => $offsetPrev,
-                ];
-            }
-            if ($list > 0) {
-                $tmp = [
-                    "list" => $list,
-                    "offset" => $offsetPrev,
-                ];
-            }
-        }
-        $previous = http_build_query($tmp);
-        $previousClass = "";
-    } else {
-        $previous = "javascript: void(0);";
-        $previousClass = "disabled";
-    }
-
-    return ["link" => $previous, "class" => $previousClass];
-}
-
-/**
- * @param int    $offset
- * @param int    $cnt
- * @param int    $moviesCnt
- * @param string $sort
- * @param string $filter
- * @param array  $genres
- * @param int    $collection
- * @param int    $list
- *
- * @return array
- */
-function getNextLink($offset, $cnt, $moviesCnt, $sort, $filter, $genres, $collection, $list)
-{
-    if ($offset + 2 * $cnt <= $moviesCnt) {
-        $offsetNext = $offset + $cnt;
-        if ($collection === 0 and $list === 0) {
-            $tmp = [
-                "sort" => $sort,
-                "filter" => $filter,
-                "genres" => $genres,
-                "offset" => $offsetNext,
-            ];
-        } else {
-            if ($collection > 0) {
-                $tmp = [
-                    "collection" => $collection,
-                    "offset" => $offsetNext,
-                ];
-            }
-            if ($list > 0) {
-                $tmp = [
-                    "list" => $list,
-                    "offset" => $offsetNext,
-                ];
-            }
-        }
-        $next = http_build_query($tmp);
-        $nextClass = "";
-    } else {
-        if ($moviesCnt - $cnt > $offset) {
-            $offsetNext = $moviesCnt - $cnt;
-            if ($collection === 0 and $list === 0) {
-                $tmp = [
-                    "sort" => $sort,
-                    "filter" => $filter,
-                    "genres" => $genres,
-                    "offset" => $offsetNext,
-                ];
-            } else {
-                if ($collection > 0) {
-                    $tmp = [
-                        "collection" => $collection,
-                        "offset" => $offsetNext,
-                    ];
-                }
-                if ($list > 0) {
-                    $tmp = [
-                        "list" => $list,
-                        "offset" => $offsetNext,
-                    ];
-                }
-            }
-            $next = http_build_query($tmp);
-            $nextClass = "";
-        } else {
-            $next = "javascript: void(0);";
-            $nextClass = "disabled";
-        }
-    }
-
-    return ["link" => $next, "class" => $nextClass];
-}
-
-/**
- * @param FrontEnd\RemoteException $exp
- * @param string                   $host
- * @param Slim\Slim                $app
- */
-function renderException(FrontEnd\RemoteException $exp, $host, Slim\Slim $app)
-{
-    $header = "Error";
-    $app->render("pageHeader.php", ["pageTitle" => $header, "host" => $host]);
-    $app->render("headerBarShows.php", ["header" => $header, "showEditButton" => false]);
-    $app->render("error.php", ["message" => $exp->getMessage(), "trace" => $exp->getStackTrace()]);
-    $app->render("pageFooter.php", ["host" => $host]);
-}
-
-$checkAPI = function ($api, $host) {
+$checkAPI = function (FrontEnd\RestApi $api, $host) {
     return function () use ($api, $host) {
         if (!$api->isValid()) {
             $app = \Slim\Slim::getInstance();
@@ -232,7 +25,6 @@ $app->get(
     '/',
     $checkAPI($api, $host),
     function () use ($app, $host, $api) {
-        $pageTitle = "Main Index";
         $header = "TV";
         $app->render("pageHeader.php", ["pageTitle" => $header." Index", "host" => $host]);
         $app->render("headerBarMain.php", ["header" => $header, "host" => $host]);
@@ -254,7 +46,7 @@ $app->get(
             $file = "example_config.json";
             $knowsAPI = false;
         }
-        $config = readJSONFile($file);
+        $config = FrontEnd\Util::readJSONFile($file);
         $apiConfig = [];
         if ($knowsAPI and $api->isValid()) {
             $apiConfig = $api->getConfig();
@@ -268,7 +60,7 @@ $app->post(
     '/install',
     function () use ($app, $host, $api) {
         $config = ["restUrl" => $_POST["restUrl"]];
-        writeJSONFile("config.json", $config);
+        FrontEnd\Util::writeJSONFile("config.json", $config);
 
         if (isset($_POST["pathMovies"])) {
             $config = [];
@@ -352,7 +144,7 @@ $app->group('/shows', $checkAPI($api, $host), function () use ($app, $host, $api
 
                 echo $res["protocol"];
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
@@ -373,7 +165,7 @@ $app->group('/shows', $checkAPI($api, $host), function () use ($app, $host, $api
                     ]
                 );
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
@@ -386,7 +178,7 @@ $app->group('/shows', $checkAPI($api, $host), function () use ($app, $host, $api
 
                 $app->redirect("http://".$host.'/shows/'.$category.'/'.$id);
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
@@ -399,7 +191,7 @@ $app->group('/shows', $checkAPI($api, $host), function () use ($app, $host, $api
 
                 $app->render("episodeDetails.php", $data);
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
@@ -431,7 +223,7 @@ $app->group('/shows', $checkAPI($api, $host), function () use ($app, $host, $api
                 $app->render($content, $contentParams);
                 $app->render("pageFooter.php", ["host" => $host]);
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
@@ -443,14 +235,14 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
         '/:category/',
         function ($category) use ($app, $host, $api) {
             try {
-                $sort = initGET("sort", "name_asc");
-                $filter = initGET("filter");
-                $genres = initGET("genres");
-                $offset = initGET("offset", 0, true);
-                $collection = initGET("collection", 0, true);
-                $list = initGET("list", 0, true);
-                $display = initGET("display", "all");
-                $cnt = 6;
+                $sort       = FrontEnd\Util::initGET("sort", "name_asc");
+                $filter     = FrontEnd\Util::initGET("filter");
+                $genres     = FrontEnd\Util::initGET("genres");
+                $offset     = FrontEnd\Util::initGET("offset", 0, true);
+                $collection = FrontEnd\Util::initGET("collection", 0, true);
+                $list       = FrontEnd\Util::initGET("list", 0, true);
+                $display    = FrontEnd\Util::initGET("display", "all");
+                $cnt        = 6;
 
                 if ($collection > 0 or $list > 0) {
                     $filter = "";
@@ -460,8 +252,8 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
 
                 $movies = $api->getMovies($category, $sort, $cnt, $offset, $filter, $genres, $collection, $list);
 
-                $previous = getPreviousLink($offset, $cnt, $sort, $filter, $genres, $collection, $list);
-                $next = getNextLink($offset, $cnt, $movies["cnt"], $sort, $filter, $genres, $collection, $list);
+                $previous = FrontEnd\Util::getPreviousLink($offset, $cnt, $sort, $filter, $genres, $collection, $list);
+                $next     = FrontEnd\Util::getNextLink($offset, $cnt, $movies["cnt"], $sort, $filter, $genres, $collection, $list);
 
                 $header = $category;
                 if ($display === "all") {
@@ -469,14 +261,14 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
                     $app->render(
                         "headerBarMovies.php",
                         [
-                            "header" => $header,
-                            "target" => $host,
+                            "header"        => $header,
+                            "target"        => $host,
                             "searchButtons" => true,
-                            "sort" => $sort,
-                            "filter" => $filter,
-                            "genres" => $genres,
-                            "collection" => $collection,
-                            "list" => $list,
+                            "sort"          => $sort,
+                            "filter"        => $filter,
+                            "genres"        => $genres,
+                            "collection"    => $collection,
+                            "list"          => $list,
                         ]
                     );
                     $view = $app->view();
@@ -492,12 +284,12 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
                         "movieWrapper.php",
                         [
                             "movieOverview" => $movieOverview,
-                            "sort" => $sort,
-                            "filter" => $filter,
-                            "genres" => $genres,
-                            "offset" => $offset,
-                            "collection" => $collection,
-                            "list" => $list,
+                            "sort"          => $sort,
+                            "filter"        => $filter,
+                            "genres"        => $genres,
+                            "offset"        => $offset,
+                            "collection"    => $collection,
+                            "list"          => $list,
                         ]
                     );
                     $app->render("pageFooter.php", ["host" => $host]);
@@ -506,16 +298,16 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
                     $app->render(
                         "movieOverview.php",
                         [
-                            "movies" => $movies["list"],
-                            "previous" => $previous["link"],
-                            "next" => $next["link"],
+                            "movies"        => $movies["list"],
+                            "previous"      => $previous["link"],
+                            "next"          => $next["link"],
                             "previousClass" => $previous["class"],
-                            "nextClass" => $next["class"],
+                            "nextClass"     => $next["class"],
                         ]
                     );
                 }
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
@@ -528,7 +320,7 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
 
                 echo $res["protocol"];
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
@@ -540,7 +332,7 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
                 $comp = $api->getCompilations($category);
                 $app->render("movieSearch.php", ["lists" => $comp["lists"], "collections" => $comp["collections"]]);
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
@@ -556,7 +348,7 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
                     echo "No Match";
                 }
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
@@ -565,12 +357,12 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
         '/:category/genres/',
         function ($category) use ($app, $host, $api) {
             try {
-                $term = initGET("term", "");
-                $res = $api->getGenres($category, $term);
+                $term = FrontEnd\Util::initGET("term", "");
+                $res  = $api->getGenres($category, $term);
 
                 echo json_encode($res);
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
@@ -579,8 +371,8 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
         '/:category/:id',
         function ($category, $id) use ($app, $host, $api) {
             try {
-                $movie = $api->getMovie($category, $id);
-                $output = initGET("output", "html");
+                $movie  = $api->getMovie($category, $id);
+                $output = FrontEnd\Util::initGET("output", "html");
                 if ($output === "html") {
                     $movie["path"] = $movie["filename"];
                     $movie["filename"] = substr($movie["filename"], strrpos($movie["filename"], "/") + 1);
@@ -591,7 +383,7 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
                     $app->render("movieDetailsDialog.php", ["data" => $movie, "movie_db_id" => $movieDbId]);
                 }
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
@@ -603,7 +395,7 @@ $app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $ap
                 echo $api->updateMovie($category, $dbid, $_POST["movieDBID"], $_POST["filename"]);
                 echo "OK";
             } catch (FrontEnd\RemoteException $exp) {
-                renderException($exp, $host, $app);
+                FrontEnd\Util::renderException($exp, $host, $app);
             }
         }
     );
