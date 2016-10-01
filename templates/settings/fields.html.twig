@@ -1,0 +1,25 @@
+<form method="post" action="">
+    <div>
+        <h2>FrontEnd</h2>
+        {% for name, value in config %}
+            <label class="config">
+                {{ name }}
+                <input type="text" name="{{ name }}" id="{{ name }}" value="{{ value }}" required="required">
+            </label>
+        {% endfor %}
+    </div>
+
+    <div>
+        <h2>API</h2>
+        {% if apiConfig|length == 0 %}
+            API config not available. Please provide/check url to API.
+        {% endif %}
+        {% for name, value in apiConfig %}
+            <label class="config">
+                {{ name }}
+                <input type="text" name="{{ name }}" id="{{ name }}" value="{{ value }}" required="required">
+            </label>
+        {% endfor %}
+    </div>
+    <button type="submit">Ok</button>
+</form>

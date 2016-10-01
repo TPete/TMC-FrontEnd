@@ -1,6 +1,7 @@
 {
     "require": {
-        "slim/slim": "2.3.5",
+        "slim/slim": "3.5",
+        "slim/twig-view": "2.1.1",
         "escapestudios/symfony2-coding-standard": "~2.0" 
     },
     "autoload": {

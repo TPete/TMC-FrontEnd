@@ -1,0 +1,14 @@
+<h2>Error</h2>
+<strong>{{ message }}</strong>
+<br>
+in
+<br>
+{% for frame in trace %}
+    {% if frame['file'] is defined %}
+        <em>{{ frame["file"] }}({{ frame["line"] }}) : </em>
+    {% endif %}
+    {% if frame['function'] is defined %}
+        <em>{{ frame["function"] }}</em>
+    {% endif %}
+    <br>
+{% endfor %}

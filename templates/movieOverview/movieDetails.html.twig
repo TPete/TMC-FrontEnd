@@ -1,0 +1,52 @@
+<div id="nm-movie-poster">
+    <img src='{{ poster }}' alt='Poster'>
+    <div>
+        <a id='movie-play-link' href='{{ path }}' target='_blank' title='Play'>
+            &#9654;
+        </a>
+        <a id='movie-edit-link' data-id='{{ id }}' data-movieDBID='{{ movie_db_id }}'
+           data-filename='{{ filename }}' href='#' title='Edit'>
+            Edit
+        </a>
+    </div>
+</div>
+<div id="nm-movie-details">
+    <div id='nm-movie-details-info'>
+        <span class="movie-details-label">Jahr/Land: </span><br>
+        <span>{{ year~" / "~countries|slice(0, 3)|join(', ') }}</span><br>
+        <span class="movie-details-label">Genres: </span><br>
+        <span>{{  genres|slice(0, 3)|join(', ') }}</span><br>
+        <span class="movie-details-label">Darsteller: </span><br>
+        <span>
+            {% set last = actors|last %}
+            {% for actor in actors %}
+                <a href="?filter={{ actor|replace({"&nbsp;": " "})|url_encode }}">
+                    {{ actor|raw }}
+                </a>
+                {% if actor != last %}
+                    <br>
+                {% endif %}
+            {% endfor %}
+        </span><br>
+        <span class="movie-details-label">Regie: </span><br>
+        <span><a href="?filter={{ director|url_encode }}">{{ director }}</a></span><br>
+        <span class="movie-details-label">Info: </span><br>
+        <span>{{ info|raw }}</span><br>
+    </div>
+    <div class="nm-movie-details-overview">
+        <h2 class="nm-movie-details-title">
+            {{ title }}
+        </h2>
+        {{ overview }}
+        {% if collection_name|length > 0 %}
+            <br><br>
+            Teil der <a href="?collection={{ collection_id }}">{{ collection_name }}</a>
+        {% endif %}
+        {% for list in lists %}
+            <br><br>
+            Teil der <a href="?list={{ list["list_id"] }}">{{ list["list_name"] }}</a> Liste
+        {% endfor %}
+    </div>
+    <br class="clear">
+</div>
+<br class="clear">

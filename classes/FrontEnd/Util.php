@@ -2,7 +2,8 @@
 
 namespace TinyMediaCenter\FrontEnd;
 
-use Slim\Slim;
+use Slim\Container;
+use Slim\Http\Response;
 
 /**
  * Class Util
@@ -205,14 +206,21 @@ class Util
     /**
      * @param RemoteException $exp
      * @param string          $host
-     * @param Slim            $app
+     * @param Container       $container
+     * @param Response        $response
      */
-    public static function renderException(RemoteException $exp, $host, Slim $app)
+    public static function renderException(RemoteException $exp, $host, Container $container, Response $response)
     {
-        $header = "Error";
-        $app->render("pageHeader.php", ["pageTitle" => $header, "host" => $host]);
-        $app->render("headerBarShows.php", ["header" => $header, "showEditButton" => false]);
-        $app->render("error.php", ["message" => $exp->getMessage(), "trace" => $exp->getStackTrace()]);
-        $app->render("pageFooter.php", ["host" => $host]);
+        $container->view->render(
+            $response,
+            'error/page.html.twig',
+            [
+                'host'           => $host,
+                'header'         => 'Error',
+                'showEditButton' => false,
+                "message"        => $exp->getMessage(),
+                "trace"          => $exp->getStackTrace(),
+            ]
+        );
     }
 }

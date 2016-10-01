@@ -4,87 +4,147 @@ set_time_limit(900);
 require 'vendor/autoload.php';
 
 use TinyMediaCenter\FrontEnd;
+use Slim\Http\Request;
+use Slim\Http\Response;
+use Slim\Views\Twig;
+use Slim\Views\TwigExtension;
 
-$app = new Slim\Slim(['templates.path' => 'templates/']);
+$app = new Slim\App(
+    [
+        'settings' => [
+            'displayErrorDetails' => true,
+        ],
+    ]
+);
 
-$host = FrontEnd\Util::getHost();
+// Get container
+$container = $app->getContainer();
+
+// Register twig component on container
+$container['view'] = function ($container) {
+    $view = new Twig(
+        'templates',
+        ['cache' => false]
+    );
+    $view->addExtension(new TwigExtension(
+        $container['router'],
+        $container['request']->getUri()
+    ));
+
+    return $view;
+};
+
+$container['foundHandler'] = function () {
+    return new \Slim\Handlers\Strategies\RequestResponseArgs();
+};
+
+$host   = FrontEnd\Util::getHost();
 $config = FrontEnd\Util::getConfig();
 
 $api = new FrontEnd\RestApi($config["restUrl"]);
 
+//Redirect url ending in non-trailing slash to trailing equivalent
+$app->add(function (Request $request, Response $response, callable $next) {
+    $uri = $request->getUri();
+    $path = $uri->getPath();
+    if ($path != '/' && substr($path, -1) !== '/') {
+        $uri = $uri->withPath($path.'/');
+
+        return $response->withRedirect((string) $uri, 301);
+    }
+
+    return $next($request, $response);
+});
+
+//Route middleware, added to "show" and "movies" groups
 $checkAPI = function (FrontEnd\RestApi $api, $host) {
-    return function () use ($api, $host) {
-        if (!$api->isValid()) {
-            $app = \Slim\Slim::getInstance();
-            $app->redirect('http://'.$host.'/install');
+    return function (Request $request, Response $response, $next) use ($api, $host) {
+        if (false === $api->isValid()) {
+            return $response->withRedirect('https://'.$host.'/install/', 301);
         }
+
+        return $next($request, $response);
     };
 };
 
 $app->get(
     '/',
-    $checkAPI($api, $host),
-    function () use ($app, $host, $api) {
-        $header = "TV";
-        $app->render("pageHeader.php", ["pageTitle" => $header." Index", "host" => $host]);
-        $app->render("headerBarMain.php", ["header" => $header, "host" => $host]);
+    function (Request $request, Response $response) use ($app, $host, $api) {
         $categories = $api->getCategories();
-        $app->render("categorySelection.php", ["categories" => $categories]);
-        $app->render("pageFooter.php", ["host" => $host]);
+
+        return $this->view->render(
+            $response,
+            'main/page.html.twig',
+            [
+                'host'       => $host,
+                'title'      => 'TV',
+                'categories' => $categories,
+            ]
+        );
     }
 );
 
 $app->get(
-    '/install',
-    function () use ($app, $host, $api) {
-        $header = "Install";
-        $app->render("pageHeader.php", ["pageTitle" => $header." Index", "host" => $host]);
-        $app->render("headerBarMovies.php", ["header" => $header, "target" => $host]);
+    '/install/',
+    function (Request $request, Response $response) use ($app, $host, $api) {
         $file = "config.json";
         $knowsAPI = true;
         if (!file_exists($file)) {
-            $file = "example_config.json";
+            $file     = "example_config.json";
             $knowsAPI = false;
         }
         $config = FrontEnd\Util::readJSONFile($file);
         $apiConfig = [];
-        if ($knowsAPI and $api->isValid()) {
+        if ($knowsAPI && $api->isValid()) {
             $apiConfig = $api->getConfig();
         }
-        $app->render("install.php", ["host" => $host, "config" => $config, "apiConfig" => $apiConfig]);
-        $app->render("pageFooter.php", ["host" => $host]);
+
+        $this->view->render(
+            $response,
+            "settings/page.html.twig",
+            [
+                'host'      => $host,
+                'header'    => 'Install',
+                'target'    => $host,
+                "config"    => $config,
+                "apiConfig" => $apiConfig,
+            ]
+        );
     }
 );
 
 $app->post(
-    '/install',
-    function () use ($app, $host, $api) {
+    '/install/',
+    function (Request $request, Response $response) use ($app, $host, $api) {
         $config = ["restUrl" => $_POST["restUrl"]];
         FrontEnd\Util::writeJSONFile("config.json", $config);
 
         if (isset($_POST["pathMovies"])) {
-            $config = [];
-            $config["pathMovies"] = $_POST["pathMovies"];
-            $config["aliasMovies"] = $_POST["aliasMovies"];
-            $config["pathShows"] = $_POST["pathShows"];
-            $config["aliasShows"] = $_POST["aliasShows"];
-            $config["dbHost"] = $_POST["dbHost"];
-            $config["dbName"] = $_POST["dbName"];
-            $config["dbUser"] = $_POST["dbUser"];
-            $config["dbPassword"] = $_POST["dbPassword"];
-            $config["TMDBApiKey"] = $_POST["TMDBApiKey"];
-            $config["TTVDBApiKey"] = $_POST["TTVDBApiKey"];
+            $config = [
+                "pathMovies"  => $_POST["pathMovies"],
+                "aliasMovies" => $_POST["aliasMovies"],
+                "pathShows"   => $_POST["pathShows"],
+                "aliasShows"  => $_POST["aliasShows"],
+                "dbHost"      => $_POST["dbHost"],
+                "dbName"      => $_POST["dbName"],
+                "dbUser"      => $_POST["dbUser"],
+                "dbPassword"  => $_POST["dbPassword"],
+                "TMDBApiKey"  => $_POST["TMDBApiKey"],
+                "TTVDBApiKey" => $_POST["TTVDBApiKey"],
+            ];
 
             $api->updateConfig($config);
         }
 
-        $app->redirect('http://'.$host.'/install');
+        $uri = 'http://'.$host.'/install/';
+
+        return $response->withRedirect($uri, 301);
     }
 );
 
 $app->get(
-    '/install/check/:type/',
-    function ($type) {
+    '/install/check/{type}/',
+    function (Request $request, Response $response, $type) {
         if ($type === "restUrl") {
             $api = new FrontEnd\RestAPI($_GET["restUrl"]);
             echo $api->isValid() ? "Ok" : "Error";
@@ -92,9 +152,9 @@ $app->get(
         if ($type === "db") {
             $api = new FrontEnd\RestAPI($_GET["restUrl"]);
             $args = [
-                "host" => $_GET["dbHost"],
-                "name" => $_GET["dbName"],
-                "user" => $_GET["dbUser"],
+                "host"     => $_GET["dbHost"],
+                "name"     => $_GET["dbName"],
+                "user"     => $_GET["dbUser"],
                 "password" => $_GET["dbPassword"],
             ];
             if ($api->isValid()) {
@@ -107,7 +167,7 @@ $app->get(
         if ($type === "movies") {
             $api = new FrontEnd\RestAPI($_GET["restUrl"]);
             $args = [
-                "pathMovies" => $_GET["pathMovies"],
+                "pathMovies"  => $_GET["pathMovies"],
                 "aliasMovies" => $_GET["aliasMovies"],
             ];
             $res = $api->check("movies", $args);
@@ -117,7 +177,7 @@ $app->get(
         if ($type === "shows") {
             $api = new FrontEnd\RestAPI($_GET["restUrl"]);
             $args = [
-                "pathShows" => $_GET["pathShows"],
+                "pathShows"  => $_GET["pathShows"],
                 "aliasShows" => $_GET["aliasShows"],
             ];
             $res = $api->check("shows", $args);
@@ -128,277 +188,319 @@ $app->get(
 );
 
 $app->post(
-    '/install/db',
-    function () use ($app, $host, $api) {
+    '/install/db/',
+    function (Request $request, Response $response) use ($app, $host, $api) {
         $api->setupDB();
-        $app->redirect("http://".$host."/install");
+
+        return $response->withRedirect("http://".$host."/install/", 301);
     }
 );
 
-$app->group('/shows', $checkAPI($api, $host), function () use ($app, $host, $api) {
-    $app->post(
-        '/update',
+$app
+    ->group(
+        '/shows',
         function () use ($app, $host, $api) {
-            try {
-                $res = $api->updateShows();
+            $app->post(
+                '/update/',
+                function (Request $request, Response $response) use ($app, $host, $api) {
+                    try {
+                        $res = $api->updateShows();
 
-                echo $res["protocol"];
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
-        }
-    );
-
-    $app->get(
-        '/:category/edit/:id',
-        function ($category, $id) use ($app, $api, $host) {
-            try {
-                $details = $api->getShowDetails($category, $id);
-                $app->render(
-                    "showEdit.php",
-                    [
-                        "category" => $category,
-                        "id" => $id,
-                        "title" => $details["title"],
-                        "tvdbId" => $details["tvdbId"],
-                        "lang" => $details["lang"],
-                    ]
-                );
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
-        }
-    );
-
-    $app->post(
-        '/:category/edit/:id',
-        function ($category, $id) use ($app, $api, $host) {
-            try {
-                $api->updateShowDetails($category, $id, $_POST["title"], $_POST["tvdbId"], $_POST["lang"]);
-
-                $app->redirect("http://".$host.'/shows/'.$category.'/'.$id);
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
-        }
-    );
-
-    $app->get(
-        '/:category/episodes/:id',
-        function ($category, $id) use ($app, $api, $host) {
-            try {
-                $data = $api->getEpisodeDescription($category, $id);
-
-                $app->render("episodeDetails.php", $data);
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
-        }
-    );
-
-    $app->get(
-        '/:category/(:id)',
-        function ($category, $id = "") use ($app, $host, $api) {
-            try {
-                if (strlen($id) === 0) {
-                    $data = $api->getCategoryOverview($category);
-                    $header = ucfirst($category);
-                    $target = $host;
-                    $content = "categoryOverview.php";
-                    $contentParams = ["overview" => $data];
-                    $showEditButton = false;
-                } else {
-                    $data = $api->getShowDetails($category, $id);
-                    $header = $data["title"];
-                    $target = $host."/shows/".$category."/";
-                    $content = "episodesList.php";
-                    $contentParams = [
-                        "showData" => $data["seasons"],
-                        "imageUrl" => $data["imageUrl"],
-                    ];
-                    $showEditButton = true;
+                        echo $res["protocol"];
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
                 }
-                $app->render("pageHeader.php", ["pageTitle" => $header, "host" => $host]);
-                $app->render("headerBarShows.php", ["header" => $header, "target" => $target, "showEditButton" => $showEditButton]);
-                $app->render($content, $contentParams);
-                $app->render("pageFooter.php", ["host" => $host]);
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
+            );
+
+            $app->get(
+                '/{category}/edit/{id}/',
+                function (Request $request, Response $response, $category, $id) use ($app, $api, $host) {
+                    try {
+                        $details = $api->getShowDetails($category, $id);
+
+                        $this->view->render(
+                            $response,
+                            "showDetails/editDialog.html.twig",
+                            [
+                                "url"    => "http://".$host.'/shows/'.$category.'/edit/'.$id.'/',
+                                "title"  => $details["title"],
+                                "tvdbId" => $details["tvdbId"],
+                                "lang"   => $details["lang"],
+                            ]
+                        );
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
+                }
+            );
+
+            $app->post(
+                '/{category}/edit/{id}/',
+                function (Request $request, Response $response, $category, $id) use ($app, $api, $host) {
+                    try {
+                        $api->updateShowDetails($category, $id, $_POST["title"], $_POST["tvdbId"], $_POST["lang"]);
+
+                        $url = "http://".$host.'/shows/'.$category.'/'.$id;
+
+                        return $response->withRedirect($url, 302);
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
+                }
+            );
+
+            $app->get(
+                '/{category}/episodes/{id}/',
+                function (Request $request, Response $response, $category, $id) use ($app, $api, $host) {
+                    try {
+                        $data = $api->getEpisodeDescription($category, $id);
+
+                        $this->view->render(
+                            $response,
+                            "showDetails/episodeDetailsAjax.html.twig",
+                            $data
+                        );
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
+                }
+            );
+
+            $this->get(
+                '/{category}/[{id}/]',
+                function (Request $request, Response $response, $category, $id) use ($app, $host, $api) {
+                    try {
+                        if (empty($id)) {
+                            $data   = $api->getCategoryOverview($category);
+                            $title  = ucfirst($category);
+                            $target = $host;
+
+                            $this->view->render(
+                                $response,
+                                'categoryOverview/page.html.twig',
+                                [
+                                    'host'           => $host,
+                                    'title'          => $title,
+                                    'target'         => $target,
+                                    'overview'       => $data,
+                                    'showEditButton' => false,
+                                ]
+                            );
+                        } else {
+                            $data   = $api->getShowDetails($category, $id);
+                            $title  = $data["title"];
+                            $target = $host."/shows/".$category."/";
+
+                            $this->view->render(
+                                $response,
+                                'showDetails/page.html.twig',
+                                [
+                                    'host'           => $host,
+                                    'title'          => $title,
+                                    'target'         => $target,
+                                    'overview'       => $data,
+                                    'showEditButton' => true,
+                                    'imageUrl'       => $data['imageUrl'],
+                                    'showData'       => $data['seasons'],
+                                ]
+                            );
+                        }
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
+                }
+            );
         }
-    );
-});
+    )
+->add($checkAPI($api, $host));
 
-$app->group('/movies', $checkAPI($api, $host), function () use ($app, $host, $api) {
-
-    $app->get(
-        '/:category/',
-        function ($category) use ($app, $host, $api) {
-            try {
-                $sort       = FrontEnd\Util::initGET("sort", "name_asc");
-                $filter     = FrontEnd\Util::initGET("filter");
-                $genres     = FrontEnd\Util::initGET("genres");
-                $offset     = FrontEnd\Util::initGET("offset", 0, true);
-                $collection = FrontEnd\Util::initGET("collection", 0, true);
-                $list       = FrontEnd\Util::initGET("list", 0, true);
-                $display    = FrontEnd\Util::initGET("display", "all");
-                $cnt        = 6;
-
-                if ($collection > 0 or $list > 0) {
-                    $filter = "";
-                    $genres = "";
-                    $sort = "name_asc";
-                }
-
-                $movies = $api->getMovies($category, $sort, $cnt, $offset, $filter, $genres, $collection, $list);
-
-                $previous = FrontEnd\Util::getPreviousLink($offset, $cnt, $sort, $filter, $genres, $collection, $list);
-                $next     = FrontEnd\Util::getNextLink($offset, $cnt, $movies["cnt"], $sort, $filter, $genres, $collection, $list);
-
-                $header = $category;
-                if ($display === "all") {
-                    $app->render("pageHeader.php", ["pageTitle" => $header." Index", "host" => $host]);
-                    $app->render(
-                        "headerBarMovies.php",
-                        [
-                            "header"        => $header,
-                            "target"        => $host,
-                            "searchButtons" => true,
-                            "sort"          => $sort,
-                            "filter"        => $filter,
-                            "genres"        => $genres,
-                            "collection"    => $collection,
-                            "list"          => $list,
-                        ]
-                    );
-                    $view = $app->view();
-                    $view->setTemplatesDirectory("templates/");
-                    $view->clear();
-                    $view->set("movies", $movies["list"]);
-                    $view->set("previous", $previous["link"]);
-                    $view->set("next", $next["link"]);
-                    $view->set("previousClass", $previous["class"]);
-                    $view->set("nextClass", $next["class"]);
-                    $movieOverview = $view->fetch("movieOverview.php");
-                    $app->render(
-                        "movieWrapper.php",
-                        [
-                            "movieOverview" => $movieOverview,
-                            "sort"          => $sort,
-                            "filter"        => $filter,
-                            "genres"        => $genres,
-                            "offset"        => $offset,
-                            "collection"    => $collection,
-                            "list"          => $list,
-                        ]
-                    );
-                    $app->render("pageFooter.php", ["host" => $host]);
-                }
-                if ($display === "overview") {
-                    $app->render(
-                        "movieOverview.php",
-                        [
-                            "movies"        => $movies["list"],
-                            "previous"      => $previous["link"],
-                            "next"          => $next["link"],
-                            "previousClass" => $previous["class"],
-                            "nextClass"     => $next["class"],
-                        ]
-                    );
-                }
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
-        }
-    );
-
-    $app->post(
-        '/update',
+$app
+    ->group(
+        '/movies',
         function () use ($app, $host, $api) {
-            try {
-                $res = $api->updateMovies();
+            $app->get(
+                '/{category}/',
+                function (Request $request, Response $response, $category) use ($app, $host, $api) {
+                    try {
+                        $sort       = FrontEnd\Util::initGET("sort", "name_asc");
+                        $filter     = FrontEnd\Util::initGET("filter");
+                        $genres     = FrontEnd\Util::initGET("genres");
+                        $offset     = FrontEnd\Util::initGET("offset", 0, true);
+                        $collection = FrontEnd\Util::initGET("collection", 0, true);
+                        $list       = FrontEnd\Util::initGET("list", 0, true);
+                        $display    = FrontEnd\Util::initGET("display", "all");
+                        $cnt        = 6;
 
-                echo $res["protocol"];
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
-        }
-    );
+                        if ($collection > 0 or $list > 0) {
+                            $filter = "";
+                            $genres = "";
+                            $sort = "name_asc";
+                        }
 
-    $app->get(
-        '/:category/search/',
-        function ($category) use ($app, $host, $api) {
-            try {
-                $comp = $api->getCompilations($category);
-                $app->render("movieSearch.php", ["lists" => $comp["lists"], "collections" => $comp["collections"]]);
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
-        }
-    );
+                        $movies = $api->getMovies($category, $sort, $cnt, $offset, $filter, $genres, $collection, $list);
 
-    $app->get(
-        '/:category/lookup/:id',
-        function ($category, $id) use ($app, $host, $api) {
-            try {
-                $movie = $api->lookupMovie($_GET["movieDBID"]);
-                if ($movie !== null) {
-                    $app->render("movieDetailsDialog.php", ["data" => $movie, "movie_db_id" => $_GET["movieDBID"]]);
-                } else {
-                    echo "No Match";
+                        $previous = FrontEnd\Util::getPreviousLink($offset, $cnt, $sort, $filter, $genres, $collection, $list);
+                        $next     = FrontEnd\Util::getNextLink($offset, $cnt, $movies["cnt"], $sort, $filter, $genres, $collection, $list);
+
+                        $header = $category;
+                        if ($display === "all") {
+                            $data = [
+                                "host"          => $host,
+                                "header"        => $header,
+                                "target"        => $host,
+                                "searchButtons" => true,
+                                "sort"          => $sort,
+                                "filter"        => $filter,
+                                "genres"        => $genres,
+                                "collection"    => $collection,
+                                "list"          => $list,
+                                "movies"        => $movies["list"],
+                                "previous"      => $previous["link"],
+                                "next"          => $next["link"],
+                                "previousClass" => $previous["class"],
+                                "nextClass"     => $next["class"],
+                            ];
+                            $this->view->render(
+                                $response,
+                                "movieOverview/page.html.twig",
+                                $data
+                            );
+                        }
+                        if ($display === "overview") {
+                            $data = [
+                                "movies"        => $movies["list"],
+                                "previous"      => $previous["link"],
+                                "next"          => $next["link"],
+                                "previousClass" => $previous["class"],
+                                "nextClass"     => $next["class"],
+                            ];
+                            $this->view->render(
+                                $response,
+                                "movieOverview/movieOverview.html.twig",
+                                $data
+                            );
+                        }
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
                 }
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
-        }
-    );
+            );
 
-    $app->get(
-        '/:category/genres/',
-        function ($category) use ($app, $host, $api) {
-            try {
-                $term = FrontEnd\Util::initGET("term", "");
-                $res  = $api->getGenres($category, $term);
+            $app->post(
+                '/update/',
+                function (Request $request, Response $response) use ($app, $host, $api) {
+                    try {
+                        $res = $api->updateMovies();
 
-                echo json_encode($res);
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
-        }
-    );
-
-    $app->get(
-        '/:category/:id',
-        function ($category, $id) use ($app, $host, $api) {
-            try {
-                $movie  = $api->getMovie($category, $id);
-                $output = FrontEnd\Util::initGET("output", "html");
-                if ($output === "html") {
-                    $movie["path"] = $movie["filename"];
-                    $movie["filename"] = substr($movie["filename"], strrpos($movie["filename"], "/") + 1);
-                    $app->render("movieDetails.php", $movie);
+                        echo $res["protocol"];
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
                 }
-                if ($output === "edit") {
-                    $movieDbId = $movie["movie_db_id"];
-                    $app->render("movieDetailsDialog.php", ["data" => $movie, "movie_db_id" => $movieDbId]);
-                }
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
-        }
-    );
+            );
 
-    $app->post(
-        '/:category/:dbid',
-        function ($category, $dbid) use ($app, $host, $api) {
-            try {
-                echo $api->updateMovie($category, $dbid, $_POST["movieDBID"], $_POST["filename"]);
-                echo "OK";
-            } catch (FrontEnd\RemoteException $exp) {
-                FrontEnd\Util::renderException($exp, $host, $app);
-            }
+            $app->get(
+                '/{category}/search/',
+                function (Request $request, Response $response, $category) use ($app, $host, $api) {
+                    try {
+                        $comp = $api->getCompilations($category);
+
+                        $this->view->render(
+                            $response,
+                            "movieOverview/movieSearch.html.twig",
+                            [
+                                "lists"       => $comp["lists"],
+                                "collections" => $comp["collections"],
+                            ]
+                        );
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
+                }
+            );
+
+            $app->get(
+                '/{category}/lookup/{id}/',
+                function (Request $request, Response $response, $category, $id) use ($app, $host, $api) {
+                    try {
+                        $movie = $api->lookupMovie($_GET["movieDBID"]);
+
+                        if ($movie !== null) {
+                            $this->view->render(
+                                $response,
+                                "movieOverview/movieDetailsDialog.html.twig",
+                                [
+                                    "data"        => $movie,
+                                    "movie_db_id" => $_GET["movieDBID"],
+                                ]
+                            );
+                        } else {
+                            echo "No Match";
+                        }
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
+                }
+            );
+
+            $app->get(
+                '/{category}/genres/',
+                function (Request $request, Response $response, $category) use ($app, $host, $api) {
+                    try {
+                        $term = FrontEnd\Util::initGET("term", "");
+                        $res  = $api->getGenres($category, $term);
+
+                        echo json_encode($res);
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
+                }
+            );
+
+            $app->get(
+                '/{category}/{id}/',
+                function (Request $request, Response $response, $category, $id) use ($app, $host, $api) {
+                    try {
+                        $movie  = $api->getMovie($category, $id);
+                        $output = FrontEnd\Util::initGET("output", "html");
+
+                        if ($output === "html") {
+                            $movie["path"]     = $movie["filename"];
+                            $movie["filename"] = substr($movie["filename"], strrpos($movie["filename"], "/") + 1);
+
+                            $this->view->render($response, "movieOverview/movieDetails.html.twig", $movie);
+                        }
+                        if ($output === "edit") {
+                            $movieDbId = $movie["movie_db_id"];
+                            $this->view->render(
+                                $response,
+                                "movieOverview/movieDetailsDialog.html.twig",
+                                [
+                                    "data"        => $movie,
+                                    "movie_db_id" => $movieDbId,
+                                ]
+                            );
+                        }
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
+                }
+            );
+
+            $app->post(
+                '/{category}/{dbid}/',
+                function (Request $request, Response $response, $category, $dbid) use ($app, $host, $api) {
+                    try {
+                        echo $api->updateMovie($category, $dbid, $_POST["movieDBID"], $_POST["filename"]);
+                        echo "OK";
+                    } catch (FrontEnd\RemoteException $exp) {
+                        FrontEnd\Util::renderException($exp, $host, $this, $response);
+                    }
+                }
+            );
         }
-    );
-});
+    )
+->add($checkAPI($api, $host));
 
 $app->run();

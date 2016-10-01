@@ -43,7 +43,7 @@ sections["shows"] = (function(){
 			var category = sections.getSubCategory(),
 				id = sections.getId();
 			$.ajax({
-				url: 'http://' + host + '/shows/' + category + '/edit/' + id,
+				url: 'http://' + host + '/shows/' + category + '/edit/' + id + '/',
 				success: function(data){
 					if ($('#show-edit-box').length > 0){
 						$('#show-edit-box').remove();
@@ -75,7 +75,7 @@ sections["shows"] = (function(){
 				$(this).prepend("<a id='episode-play-link' href='" + link + "' target='_blank' title='Play'>&#9654;</a>");
 			}
 			$.ajax({
-				url: 'http://' + host + '/shows/' + category + '/episodes/' + id,
+				url: 'http://' + host + '/shows/' + category + '/episodes/' + id + '/',
 				success: function(data){
 					$('#episode-details').html(data);
 				},
@@ -122,7 +122,7 @@ sections["movies"] = (function(){
 			url = 'http://' + host + '/movies/' + category + '/lookup/';
 		}
 		$.ajax({
-			url: url + dbid,
+			url: url + dbid + '/',
 			data: {
 				output: 'edit',
 				movieDBID: movieDBID
@@ -139,7 +139,7 @@ sections["movies"] = (function(){
 						{text: "Speichern",
 						 click : function(){
 							$.ajax({
-								url: 'http://' + host + '/movies/' + category + '/' + dbid, 
+								url: 'http://' + host + '/movies/' + category + '/' + dbid + '/',
 								type: 'POST',
 								context: this,
 								data: {filename: filename,
@@ -275,7 +275,7 @@ sections["movies"] = (function(){
 			var id = $(this).data('id'),
 				cat = sections.getSubCategory();
 			$.ajax({
-				url: 'http://' + host + '/movies/' + cat + '/' + id,
+				url: 'http://' + host + '/movies/' + cat + '/' + id + '/',
 				success: function(data){
 					$('#nm-movie-details-wrapper').html(data);
 					addEditLinkHandler();
@@ -378,7 +378,7 @@ sections['install'] = (function(){
 				data = {};
 			data[id] = $(obj).val();
 			$.ajax({
-				url: 'http://' + host + '/install/check/restUrl',
+				url: 'http://' + host + '/install/check/restUrl/',
 				data: data,
 				success: function(data){
 					if (data === 'Ok'){
@@ -403,7 +403,7 @@ sections['install'] = (function(){
 			$('#db-box').remove();
 			if (restUrl.length > 0 && dbHost.length > 0 && dbName.length > 0 && dbUser.length > 0 && dbPassword.length > 0){
 				$.ajax({
-					url: 'http://' + host + '/install/check/db',
+					url: 'http://' + host + '/install/check/db/',
 					data: {
 						dbHost: dbHost,
 						dbName: dbName,
@@ -448,7 +448,7 @@ sections['install'] = (function(){
 				aliasMovies = $('#aliasMovies').val();
 			if (restUrl.length > 0 && pathMovies.length > 0 && aliasMovies.length > 0){
 				$.ajax({
-					url: 'http://' + host + '/install/check/movies',
+					url: 'http://' + host + '/install/check/movies/',
 					data: {
 						pathMovies: pathMovies,
 						aliasMovies: aliasMovies,
@@ -478,7 +478,7 @@ sections['install'] = (function(){
 			$('#shows-box').remove();
 			if (restUrl.length > 0 && pathShows.length > 0 && aliasShows.length > 0){
 				$.ajax({
-					url: 'http://' + host + '/install/check/shows',
+					url: 'http://' + host + '/install/check/shows/',
 					data: {
 						pathShows: pathShows,
 						aliasShows: aliasShows,

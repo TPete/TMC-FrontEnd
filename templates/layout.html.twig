@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        {% block title %}
+            TV
+        {% endblock %}
+    </title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="icon" type="image/png" href="http://{{ host }}/imgs/favicon.png">
+    {% block stylesheets %}
+        <link rel="Stylesheet" type="text/css" href="http://{{ host }}/js/jquery-ui-1.10.3.custom/css/smoothness/jquery-ui-1.10.3.custom.css"/>
+        <link rel="Stylesheet" type="text/css" href="http://{{ host }}/js/jquery.tagit.css"/>
+        <link rel="Stylesheet" type="text/css" href="http://{{ host }}/style.css?ver=1"/>
+    {% endblock %}
+</head>
+<body>
+<input type="hidden" id="host" value="{{ host }}">
+<div class='content-wrapper'>
+    {% block header_bar %}
+
+    {% endblock %}
+    {% block content %}
+        Hier ist nichts
+    {% endblock %}
+</div>
+{% block javascript %}
+    <script type="text/javascript" src='http://{{ host }}/js/jquery-1.10.2.min.js'></script>
+    <script type="text/javascript" src='http://{{ host }}/js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js'></script>
+    <script type="text/javascript" src='http://{{ host }}/js/tag-it.min.js'></script>
+    <script type="text/javascript" src='http://{{ host }}/main.js?ver=1'></script>
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,10 @@
+<a href="?{{ previous }}" id="movie-overview-prev" class="movie-overview-nav {{ previousClass }}">
+    &lt;
+</a>
+{% for row in movies %}
+    <img class='movie-overview-poster' src='{{ row["poster"] }}' alt='Poster' data-id='{{ row["id"] }}'>
+{% endfor %}
+<a href="?{{ next }}" id="movie-overview-next" class="movie-overview-nav {{ nextClass }}">
+    &gt;
+</a>
+<br class="clear">

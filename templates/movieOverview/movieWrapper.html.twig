@@ -1,0 +1,15 @@
+<input type="hidden" id="hidden-sort" value="{{ sort }}">
+<input type="hidden" id="hidden-filter" value="{{ filter }}">
+<input type="hidden" id="hidden-genres" value="{{ genres }}">
+<input type="hidden" id="hidden-offset" value="{{ offset }}">
+<input type="hidden" id="hidden-collection" value="{{ collection }}">
+<input type="hidden" id="hidden-list" value="{{ list }}">
+
+<div id='nm-movie-details-wrapper'>
+
+</div>
+<div id='movie-overview'>
+    {% if movies|length > 0 %}
+        {% include "movieOverview/movieOverview.html.twig" %}
+    {% endif %}
+</div>

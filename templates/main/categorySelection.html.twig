@@ -1,0 +1,8 @@
+<div class='category-selection-wrapper'>
+    <div class='category-selection'>
+        {% for link, label in categories %}
+            <a class="category-link" href="{{ link }}">{{ label }}</a>
+        {% endfor %}
+        <br class="clear">
+    </div>
+</div>
