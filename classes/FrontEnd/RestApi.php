@@ -27,7 +27,7 @@ class RestApi
      */
     public function isValid()
     {
-        $url = "/config";
+        $url = "/config/";
         $resp = $this->checkUrl($url);
 
         return $resp;
@@ -38,7 +38,7 @@ class RestApi
      */
     public function getConfig()
     {
-        $url = "/config";
+        $url = "/config/";
         $config = $this->curlDownload($url);
 
         return $config;
@@ -51,7 +51,7 @@ class RestApi
      */
     public function updateConfig($config)
     {
-        $url = "/config";
+        $url = "/config/";
         $res = $this->curlPost($url, $config);
 
         return $res;
@@ -62,7 +62,7 @@ class RestApi
      */
     public function getCategories()
     {
-        $url = "/categories";
+        $url = "/categories/";
         $res = $this->curlDownload($url);
 
         return $res;
@@ -76,7 +76,7 @@ class RestApi
      */
     public function check($type, $args)
     {
-        $url = "/config/check/".$type;
+        $url = "/config/check/".$type."/";
         $res = $this->curlDownload($url, $args);
 
         return $res;
@@ -87,7 +87,7 @@ class RestApi
      */
     public function setupDB()
     {
-        $url = "/config/db";
+        $url = "/config/db/";
         $res = $this->curlPost($url);
 
         return $res;
@@ -100,7 +100,7 @@ class RestApi
      */
     public function getCategoryOverview($category)
     {
-        $url = "/shows/".$category;
+        $url = "/shows/".$category."/";
         $list = $this->curlDownload($url);
 
         return $list;
@@ -114,7 +114,7 @@ class RestApi
      */
     public function getShowDetails($category, $id)
     {
-        $url = "/shows/".$category."/".$id;
+        $url = "/shows/".$category."/".$id."/";
         $details = $this->curlDownload($url);
 
         return $details;
@@ -128,7 +128,7 @@ class RestApi
      */
     public function getEpisodeDescription($category, $id)
     {
-        $url = "/shows/".$category."/episodes/".$id;
+        $url = "/shows/".$category."/episodes/".$id."/";
         $description = $this->curlDownload($url);
 
         return $description;
@@ -145,7 +145,7 @@ class RestApi
      */
     public function updateShowDetails($category, $id, $title, $tvdbId, $lang)
     {
-        $url = "/shows/".$category."/edit/".$id;
+        $url = "/shows/".$category."/edit/".$id."/";
         $args = [
             "title"  => $title,
             "tvdbId" => $tvdbId,
@@ -161,7 +161,7 @@ class RestApi
      */
     public function updateShows()
     {
-        $url = "/shows/maintenance";
+        $url = "/shows/maintenance/";
         $result = $this->curlPost($url, "", 720);
 
         return $result;
@@ -175,7 +175,7 @@ class RestApi
      */
     public function getMovie($category, $id)
     {
-        $url = "/movies/".$category."/".$id;
+        $url = "/movies/".$category."/".$id."/";
         $res = $this->curlDownload($url);
 
         return $res;
@@ -188,7 +188,7 @@ class RestApi
      */
     public function lookupMovie($id)
     {
-        $url = "/movies/lookup/".$id;
+        $url = "/movies/lookup/".$id."/";
         $res = $this->curlDownload($url);
 
         return $res;
@@ -208,7 +208,7 @@ class RestApi
      */
     public function getMovies($category, $sort, $cnt, $offset, $filter = "", $genres = "", $collection = "0", $list = "0")
     {
-        $url = "/movies/".$category;
+        $url = "/movies/".$category."/";
         $args = [
             "sort"       => $sort,
             "cnt"        => $cnt,
@@ -233,7 +233,7 @@ class RestApi
      */
     public function updateMovie($category, $dbID, $movieDBID, $filename)
     {
-        $url = "/movies/".$category."/".$dbID;
+        $url = "/movies/".$category."/".$dbID."/";
         $args = [
             "movieDBID" => $movieDBID,
             "filename"  => $filename,
@@ -278,7 +278,7 @@ class RestApi
      */
     public function updateMovies()
     {
-        $url = "/movies/maintenance";
+        $url = "/movies/maintenance/";
         $result = $this->curlPost($url, "", 720);
 
         return $result;
