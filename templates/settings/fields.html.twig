@@ -1,25 +1,35 @@
 <form method="post" action="">
-    <div>
-        <h2>FrontEnd</h2>
+    <fieldset>
+        <legend>Frontend</legend>
         {% for name, value in config %}
-            <label class="config">
-                {{ name }}
-                <input type="text" name="{{ name }}" id="{{ name }}" value="{{ value }}" required="required">
-            </label>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">
+                    {{ name }}
+                </label>
+                <div class="col-sm-10 col-md-6">
+                    <input class="form-control" type="text" name="{{ name }}" id="{{ name }}" value="{{ value }}" required="required">
+                </div>
+            </div>
         {% endfor %}
-    </div>
+    </fieldset>
 
-    <div>
-        <h2>API</h2>
+    <fieldset>
+        <legend>API</legend>
         {% if apiConfig|length == 0 %}
-            API config not available. Please provide/check url to API.
+            <p>
+                API-Konfiguration nicht gefunden. Bitte die Url zur API prüfen.
+            </p>
         {% endif %}
         {% for name, value in apiConfig %}
-            <label class="config">
-                {{ name }}
-                <input type="text" name="{{ name }}" id="{{ name }}" value="{{ value }}" required="required">
-            </label>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">
+                    {{ name }}
+                </label>
+                <div class="col-sm-10 col-md-6">
+                    <input class="form-control" type="text" name="{{ name }}" id="{{ name }}" value="{{ value }}" required="required">
+                </div>
+            </div>
         {% endfor %}
-    </div>
-    <button type="submit">Ok</button>
+    </fieldset>
+    <button class="btn btn-primary" type="submit">Speichern</button>
 </form>

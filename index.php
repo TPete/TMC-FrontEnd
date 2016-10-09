@@ -34,6 +34,7 @@ $container['view'] = function ($container) {
     return $view;
 };
 
+// Use RequestResponseArgs Strategy
 $container['foundHandler'] = function () {
     return new \Slim\Handlers\Strategies\RequestResponseArgs();
 };
@@ -42,6 +43,9 @@ $host   = FrontEnd\Util::getHost();
 $config = FrontEnd\Util::getConfig();
 
 $api = new FrontEnd\RestApi($config["restUrl"]);
+
+// Add nav categoires
+$container['categories'] = $api->getCategories();
 
 //Redirect url ending in non-trailing slash to trailing equivalent
 $app->add(function (Request $request, Response $response, callable $next) {
@@ -67,18 +71,17 @@ $checkAPI = function (FrontEnd\RestApi $api, $host) {
     };
 };
 
+
 $app->get(
     '/',
     function (Request $request, Response $response) use ($app, $host, $api) {
-        $categories = $api->getCategories();
-
         return $this->view->render(
             $response,
             'main/page.html.twig',
             [
                 'host'       => $host,
                 'title'      => 'TV',
-                'categories' => $categories,
+                'categories' => $this->categories,
             ]
         );
     }
@@ -103,11 +106,12 @@ $app->get(
             $response,
             "settings/page.html.twig",
             [
-                'host'      => $host,
-                'header'    => 'Install',
-                'target'    => $host,
-                "config"    => $config,
-                "apiConfig" => $apiConfig,
+                'host'       => $host,
+                'title'      => 'Einstellungen',
+                'target'     => $host,
+                'config'     => $config,
+                'apiConfig'  => $apiConfig,
+                'categories' => $this->categories,
             ]
         );
     }
@@ -147,7 +151,9 @@ $app->get(
     function (Request $request, Response $response, $type) {
         if ($type === "restUrl") {
             $api = new FrontEnd\RestAPI($_GET["restUrl"]);
-            echo $api->isValid() ? "Ok" : "Error";
+            $res['result'] = $api->isValid() ? "Ok" : "Error";
+
+            echo json_encode($res);
         }
         if ($type === "db") {
             $api = new FrontEnd\RestAPI($_GET["restUrl"]);
@@ -159,10 +165,10 @@ $app->get(
             ];
             if ($api->isValid()) {
                 $res = $api->check("db", $args);
-                echo json_encode($res);
             } else {
-                echo "Error";
+                $res['result'] = 'Error';
             }
+            echo json_encode($res);
         }
         if ($type === "movies") {
             $api = new FrontEnd\RestAPI($_GET["restUrl"]);
@@ -172,7 +178,7 @@ $app->get(
             ];
             $res = $api->check("movies", $args);
 
-            echo $res["result"];
+            echo json_encode($res);
         }
         if ($type === "shows") {
             $api = new FrontEnd\RestAPI($_GET["restUrl"]);
@@ -213,28 +219,6 @@ $app
                 }
             );
 
-            $app->get(
-                '/{category}/edit/{id}/',
-                function (Request $request, Response $response, $category, $id) use ($app, $api, $host) {
-                    try {
-                        $details = $api->getShowDetails($category, $id);
-
-                        $this->view->render(
-                            $response,
-                            "showDetails/editDialog.html.twig",
-                            [
-                                "url"    => "http://".$host.'/shows/'.$category.'/edit/'.$id.'/',
-                                "title"  => $details["title"],
-                                "tvdbId" => $details["tvdbId"],
-                                "lang"   => $details["lang"],
-                            ]
-                        );
-                    } catch (FrontEnd\RemoteException $exp) {
-                        FrontEnd\Util::renderException($exp, $host, $this, $response);
-                    }
-                }
-            );
-
             $app->post(
                 '/{category}/edit/{id}/',
                 function (Request $request, Response $response, $category, $id) use ($app, $api, $host) {
@@ -258,7 +242,7 @@ $app
 
                         $this->view->render(
                             $response,
-                            "showDetails/episodeDetailsAjax.html.twig",
+                            "shows/details/episodeDetailsAjax.html.twig",
                             $data
                         );
                     } catch (FrontEnd\RemoteException $exp) {
@@ -278,13 +262,14 @@ $app
 
                             $this->view->render(
                                 $response,
-                                'categoryOverview/page.html.twig',
+                                'shows/overview/page.html.twig',
                                 [
                                     'host'           => $host,
                                     'title'          => $title,
                                     'target'         => $target,
                                     'overview'       => $data,
                                     'showEditButton' => false,
+                                    'categories'     => $this->categories,
                                 ]
                             );
                         } else {
@@ -294,7 +279,7 @@ $app
 
                             $this->view->render(
                                 $response,
-                                'showDetails/page.html.twig',
+                                'shows/details/page.html.twig',
                                 [
                                     'host'           => $host,
                                     'title'          => $title,
@@ -303,6 +288,9 @@ $app
                                     'showEditButton' => true,
                                     'imageUrl'       => $data['imageUrl'],
                                     'showData'       => $data['seasons'],
+                                    "tvdbId"         => $data["tvdbId"],
+                                    "url"            => "http://".$host.'/shows/'.$category.'/edit/'.$id.'/',
+                                    'categories'     => $this->categories,
                                 ]
                             );
                         }
@@ -343,6 +331,8 @@ $app
                         $previous = FrontEnd\Util::getPreviousLink($offset, $cnt, $sort, $filter, $genres, $collection, $list);
                         $next     = FrontEnd\Util::getNextLink($offset, $cnt, $movies["cnt"], $sort, $filter, $genres, $collection, $list);
 
+                        $comp = $api->getCompilations($category);
+
                         $header = $category;
                         if ($display === "all") {
                             $data = [
@@ -360,10 +350,13 @@ $app
                                 "next"          => $next["link"],
                                 "previousClass" => $previous["class"],
                                 "nextClass"     => $next["class"],
+                                "lists"         => $comp["lists"],
+                                "collections"   => $comp["collections"],
+                                'categories'    => $this->categories,
                             ];
                             $this->view->render(
                                 $response,
-                                "movieOverview/page.html.twig",
+                                "movies/page.html.twig",
                                 $data
                             );
                         }
@@ -377,7 +370,7 @@ $app
                             ];
                             $this->view->render(
                                 $response,
-                                "movieOverview/movieOverview.html.twig",
+                                "movies/movieOverview.html.twig",
                                 $data
                             );
                         }
@@ -401,26 +394,6 @@ $app
             );
 
             $app->get(
-                '/{category}/search/',
-                function (Request $request, Response $response, $category) use ($app, $host, $api) {
-                    try {
-                        $comp = $api->getCompilations($category);
-
-                        $this->view->render(
-                            $response,
-                            "movieOverview/movieSearch.html.twig",
-                            [
-                                "lists"       => $comp["lists"],
-                                "collections" => $comp["collections"],
-                            ]
-                        );
-                    } catch (FrontEnd\RemoteException $exp) {
-                        FrontEnd\Util::renderException($exp, $host, $this, $response);
-                    }
-                }
-            );
-
-            $app->get(
                 '/{category}/lookup/{id}/',
                 function (Request $request, Response $response, $category, $id) use ($app, $host, $api) {
                     try {
@@ -429,7 +402,7 @@ $app
                         if ($movie !== null) {
                             $this->view->render(
                                 $response,
-                                "movieOverview/movieDetailsDialog.html.twig",
+                                "movies/movieDetailsDialog.html.twig",
                                 [
                                     "data"        => $movie,
                                     "movie_db_id" => $_GET["movieDBID"],
@@ -469,13 +442,13 @@ $app
                             $movie["path"]     = $movie["filename"];
                             $movie["filename"] = substr($movie["filename"], strrpos($movie["filename"], "/") + 1);
 
-                            $this->view->render($response, "movieOverview/movieDetails.html.twig", $movie);
+                            $this->view->render($response, "movies/movieDetails.html.twig", $movie);
                         }
                         if ($output === "edit") {
                             $movieDbId = $movie["movie_db_id"];
                             $this->view->render(
                                 $response,
-                                "movieOverview/movieDetailsDialog.html.twig",
+                                "movies/movieDetailsDialog.html.twig",
                                 [
                                     "data"        => $movie,
                                     "movie_db_id" => $movieDbId,

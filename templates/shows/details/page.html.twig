@@ -1,0 +1,19 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block dialogs %}
+    {% if showEditButton %}
+        {% include "shows/details/editDialog.html.twig" %}
+    {% endif %}
+{% endblock %}
+
+{% block header_bar %}
+    {% include "shows/headerBar.html.twig" %}
+{% endblock %}
+
+{% block content %}
+    {% include "shows/details/episodesList.html.twig" %}
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "main/headerBar/default.html.twig" %}
+
+{% block nav %}
+    {{ parent() }}
+{% endblock %}
+
+{% block buttons %}
+    <div class="dropdown">
+        <button class="btn btn-secondary drowdown-toggle" type="button" data-toggle="dropdown">
+            <i class="fa fa-cog"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-right">
+            <a class="dropdown-item" href="install/">Einstellungen</a>
+            <form method="post" action="movies/update/">
+                <button class="dropdown-item" type="submit">Filme aktualisieren</button>
+            </form>
+            <form method="post" action="shows/update/">
+                <button class="dropdown-item" type="submit">Serien aktualisieren</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "main/headerBar/default.html.twig" %}
+
+{% block nav %}
+    {{ parent() }}
+{% endblock %}
+
+{% block buttons %}
+    {% if showEditButton %}
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#show-edit-box">
+            Edit
+        </button>
+    {% endif %}
+{% endblock %}

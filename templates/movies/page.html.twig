@@ -1,0 +1,17 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block dialogs %}
+    {% include "movies/searchDialog.html.twig" %}
+{% endblock %}
+
+{% block header_bar %}
+    {% include "movies/headerBar.html.twig" %}
+{% endblock %}
+
+{% block content %}
+    {% include "movies/movieWrapper.html.twig" %}
+{% endblock %}

@@ -1,0 +1,28 @@
+{% block nav %}
+    <nav class="navbar navbar-dark bg-inverse navbar-fixed-top">
+        <button class="navbar-toggler hidden-sm-up" type="button" data-toggle="collapse" data-target="#collapsingNavbar2" aria-controls="collapsingNavbar2" aria-expanded="false" aria-label="Toggle navigation">
+            &#9776;
+        </button>
+        <div class="collapse navbar-toggleable-xs" id="collapsingNavbar2">
+            <ul class="nav navbar-nav">
+                <li class="nav-item">
+                    <a class="navbar-brand" href="http://{{ host }}">TV</a>
+                </li>
+                {% for type in categories %}
+                    {% for link, label in type %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="http://{{ host }}/{{ link }}">
+                                {{ label }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+            <div class="pull-xs-right">
+                {% block buttons %}
+    
+                {% endblock %}
+            </div>
+        </div>
+    </nav>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "main/headerBar/default.html.twig" %}
+
+{% block nav %}
+    {{ parent() }}
+{% endblock %}
+
+{% block buttons %}
+    {% if searchButtons is defined %}
+        {% set class1 = (filter == "" and genres == "" and collection == 0 and list == 0 and sort == "date_desc") ? " active" : ""  %}
+        {% set class2 = (filter == "" and genres == "" and collection == 0 and list == 0 and sort == "name_asc") ? " active" : "" %}
+        <a class="btn btn-secondary{{ class1 }}" href="?sort=date_desc">Datum</a>
+        <a class="btn btn-secondary{{ class2 }}" href="?sort=name_asc">Name</a>
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#movie-search-box">
+            Suche
+        </button>
+    {% endif %}
+{% endblock %}

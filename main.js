@@ -1,64 +1,10 @@
 var main, sections = {}, host = $('#host').val();
 
-sections["main"] = (function(){
-	"use strict";
-	var init;
-	
-	init = function(){
-		$('#setup-menu').hide();
-		$('#setup-box-link')
-		.off('click')
-		.on('click', function(){
-			if ($('#setup-menu').is(':visible')){
-				$('#setup-menu').hide();
-				$('#setup-box-link').removeClass('header-buttons-active');
-			}
-			else{
-				$('#setup-menu').show();
-				$('#setup-box-link').addClass('header-buttons-active');
-				$(document)
-				.on('click.hide-menu', function(){
-					$('#setup-menu').hide();
-					$('#setup-box-link').removeClass('header-buttons-active');
-					$(document).off('click.hide-menu');
-				});
-			}
-			return false;
-		});
-	};
-	
-	return {
-		init: init
-	};
-}());
-
 sections["shows"] = (function(){
 	"use strict";
 	var init;
 	
 	init = function(){
-		$('#edit-box-link')
-		.off('click')
-		.on('click', function(){
-			var category = sections.getSubCategory(),
-				id = sections.getId();
-			$.ajax({
-				url: 'http://' + host + '/shows/' + category + '/edit/' + id + '/',
-				success: function(data){
-					if ($('#show-edit-box').length > 0){
-						$('#show-edit-box').remove();
-					}
-					$('body').append(data);
-					$('#show-edit-box').dialog({
-						width: 'auto'
-					});
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					alert(errorThrown);
-				}
-			});
-		});
-		
 		$('.episode-link-present, .episode-link-missing')
 		.off('click')
 		.on('click', function(){
@@ -88,9 +34,9 @@ sections["shows"] = (function(){
 		$('.episodes-wrapper')
 		.off('scroll')
 		.on('scroll', function(e){
-			var top = $('.series-list > li:first').offset().top,
-				titleHeight = $('.series-title').outerHeight(true),
-				offset = $('.series-list > li:first > span').outerHeight(true),
+			var top = $('.season-list > li:first').offset().top,
+				titleHeight = $('.navbar').outerHeight(true),
+				offset = $('.season-list > li:first > span').outerHeight(true),
 				mh = $('.episodes-wrapper').innerHeight() - offset;
 
 			if (top > titleHeight){
@@ -180,6 +126,7 @@ sections["movies"] = (function(){
 	}
 	
 	function addPosterClickHandler(){
+	    //TODO use bootstrap modal
 		$('#nm-movie-poster > img')
 		.eq(0)
 		.off('click')
@@ -264,9 +211,9 @@ sections["movies"] = (function(){
 	}
 		
 	function initHandlers(){
-		window.onpopstate = function(event){
+		window.onpopstate = function(){
 			updateMovieOverview(window.location.search.substring(1), false);
-		}
+		};
 		
 		
 		$('.movie-overview-poster')
@@ -294,45 +241,6 @@ sections["movies"] = (function(){
 			
 			return false;
 		});
-		
-		$('#search-box-link')
-		.off('click')
-		.on('click', function(){
-			var cat = sections.getSubCategory();
-			$.ajax({
-				url: 'http://' + host + '/movies/' + cat + '/search/',
-				success: function(data){
-					var filter = $('#hidden-filter').val(),
-						genres = $('#hidden-genres').val(),
-						sort = $('#hidden-sort').val(),
-						collection = $('#hidden-collection').val(),
-						list = $('#hidden-list').val();
-					if ($('#nm-movie-search-box').length > 0){
-						$('#nm-movie-search-box').remove();
-					}
-					$('body').append(data);
-					$('#filter').val(filter);
-					$('#genres').val(genres);
-					$('#sort').val(sort);
-					$('#collection').val(collection);
-					$('#list').val(list);
-					$('#nm-movie-search-box').dialog({
-						width: 'auto'
-					});
-					$('#genres').tagit({
-						showAutocompleteOnFocus: true,
-						allowSpaces: true,
-						autocomplete: {
-							source: 'http://' + host + '/movies/' + cat + '/genres/'
-						}
-					});
-					
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					alert(errorThrown);
-				}
-			});
-		});
 	}
 	
 	init = function(){
@@ -351,23 +259,48 @@ sections['install'] = (function(){
 	"use strict";
 	var init;
 	
-	function markValid(obj){
-		$(obj)
-		.removeClass('highlight-valid')
-		.removeClass('highlight-invalid')
-		.addClass('highlight-valid');
+	function markValid(selector){
+		var formGroup = $(selector).closest('.form-group'),
+            feedback = formGroup.find('.form-control-feedback');
+		formGroup
+			.removeClass('has-success')
+            .removeClass('has-danger')
+            .addClass('has-success');
+        if (feedback) {
+            feedback.remove();
+        }
+		$(selector)
+            .removeClass('form-control-success')
+            .removeClass('form-control-danger')
+            .addClass('form-control-success');
 	}
 	
-	function markInvalid(obj){
-		$(obj)
-		.removeClass('highlight-valid')
-		.removeClass('highlight-invalid')
-		.addClass('highlight-invalid');
+	function markInvalid(selector){
+        var formGroup = $(selector).closest('.form-group'),
+            feedback = formGroup.find('.form-control-feedback');
+        formGroup
+            .removeClass('has-success')
+            .removeClass('has-danger')
+            .addClass('has-danger');
+        if (feedback) {
+            feedback.remove();
+        }
+        $(selector)
+            .removeClass('form-control-success')
+            .removeClass('form-control-danger')
+            .addClass('form-control-danger');
 	}
 	
-	function showMessageBox(id, msg, referenceId){
-		$('.content-wrapper').append('<div id="' + id + '" class="config-box">' + msg + '</div>');						
-		$('#' + id).css('top', $('#' + referenceId).position().top);
+	function showMessageBox(selector, msg){
+	    var input = $(selector),
+            formGroup = $(selector).closest('.form-group'),
+            feedback = formGroup.find('.form-control-feedback');
+
+        if (feedback) {
+            feedback.remove();
+        }
+	    input
+            .after('<div class="form-control-feedback">' + msg + '</div>');
 	}
 	
 	init = function(){
@@ -381,11 +314,13 @@ sections['install'] = (function(){
 				url: 'http://' + host + '/install/check/restUrl/',
 				data: data,
 				success: function(data){
-					if (data === 'Ok'){
+				    data = JSON.parse(data);
+					if (data['result'] === 'Ok'){
 						markValid(obj);
 					}
 					else{
 						markInvalid(obj);
+                        showMessageBox('#restUrl', 'Die Url scheint nicht korrekt zu sein.');
 					}
 				},
 				error: function(jqXHR, textStatus, errorThrown){
@@ -420,13 +355,14 @@ sections['install'] = (function(){
 							markValid('#dbUser');
 							markValid('#dbPassword');
 							if (data['dbSetup'] === 'Ok'){
-								msg = 'All required database tables are present.';
+								msg = 'Alle erforderlichen Datenbanktabellen sind vorhanden.';
 							}
 							else{
-								msg = 'The database setup is incomplete. Would you like to setup the database now?';
-								msg += '<br><form method="POST" action="install/db" id="install-db-form"><button tpye="submit">Setup DB</button></form'
+							    //TODO show dialog
+								msg = 'Die Datenbankeinrichtung ist unvollständig. Soll die Datenbank jetzt eingerichtet werden?';
+								msg += '<br><form method="POST" action="install/db" id="install-db-form"><button type="submit">Setup DB</button></form>'
 							}
-							showMessageBox('db-box', msg, 'dbHost');
+							showMessageBox('#dbHost', msg);
 						}
 						else{
 							markInvalid('#dbHost');
@@ -455,9 +391,16 @@ sections['install'] = (function(){
 						restUrl: restUrl
 					},
 					success: function(data){
-						if (data === 'Ok'){
+                        var msg = 'Die folgenden Unterordner wurden gefunden und werden als Kategorien verwendet: ';
+                            data = JSON.parse(data);
+						if (data['result'] === 'Ok'){
+                            data['folders'].forEach(function(element){
+                                msg += element + ', ';
+                            });
+                            msg = msg.substr(0, msg.length - 2);
 							markValid('#pathMovies');
 							markValid('#aliasMovies');
+                            showMessageBox('#aliasMovies', msg);
 						}
 						else{
 							markInvalid('#pathMovies');
@@ -485,9 +428,8 @@ sections['install'] = (function(){
 						restUrl: restUrl
 					},
 					success: function(data){
-						var msg = 'The following sub folders where found and will be used as categories: ',
-							top;
-						data = JSON.parse(data);
+						var msg = 'Die folgenden Unterordner wurden gefunden und werden als Kategorien verwendet: ';
+						    data = JSON.parse(data);
 						if (data['result'] === 'Ok'){
 							data['folders'].forEach(function(element){
 								msg += element + ', ';
@@ -495,7 +437,7 @@ sections['install'] = (function(){
 							msg = msg.substr(0, msg.length - 2);
 							markValid('#pathShows');
 							markValid('#aliasShows');
-							showMessageBox('shows-box', msg, 'pathShows');
+							showMessageBox('#aliasShows', msg);
 						}
 						else{
 							markInvalid('#pathShows');
@@ -519,8 +461,8 @@ sections['install'] = (function(){
 
 sections.getPath = function(){
 	var path = window.location.href,
-	host = $('#host').val(),
-	split;
+	    host = $('#host').val();
+
 	path = path.substr(path.indexOf(host) + host.length);
 	if (path.substr(0, 1) === '/'){
 		path = path.substr(1);
@@ -539,7 +481,7 @@ sections.getSubCategory = function(){
 	var path = this.getPath();
 	
 	return path[1];
-}
+};
 
 sections.getId = function(){
 	var path = this.getPath();
@@ -562,7 +504,7 @@ sections.init = (function(){
 		else{
 			console.log("no init");
 		}
-	}
+	};
 	
 	return init;
 }());
@@ -573,9 +515,6 @@ main = (function(){
 	
 	init = function(){
 		sections.init();
-	    
-	    $('.jquery-ui-buttonset').buttonset();
-	    $('.jquery-ui-button').button();
 	};
 	
 	return {

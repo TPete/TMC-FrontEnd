@@ -1,0 +1,35 @@
+<div class="row episodes-wrapper" style='background-image: url("{{ imageUrl }}")'>
+    {% if showData|length > 1 %}
+        <ul class="season-navigation">
+            {% for season in showData %}
+                <li>
+                    <a href="#{{ season["title"] }}-link">{{ season["title"] }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <ul class='season-list'>
+        {% for season in showData %}
+        <li>
+            <span class='season-title' id="{{ season["title"]  }}-link">
+                {{ season["title"] }}
+            </span>
+            <ul class='episode-list'>
+                {% for episode in season["episodes"] %}
+                    {% set class = episode["link"] is not empty ? "episode-link-present" : "episode-link-missing" %}
+                    {% set link = episode["link"] is not empty ? episode["link"] : "" %}
+
+                    <li class="{{  class }}">
+                        <a href='javascript:void(0)' title='{{ episode["label"]  }}'
+                           data-id='{{ episode["id"] }}' data-href='{{ link }}'>
+                            {{ episode["label"] }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    <div id='episode-details'>
+    </div>
+</div>

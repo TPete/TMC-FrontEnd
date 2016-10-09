@@ -1,0 +1,130 @@
+html, body{
+    height: 100%;
+    font-family: Verdana, Arial, sans-serif;
+    color: #626262;
+}
+
+body{
+    margin: 0;
+    background-color: #b2d7e8;
+    height: 100%;
+}
+
+.container, .container-fluid {
+    margin-top: 3.3em;
+}
+
+.teaser-main {
+    padding: 0 1em;
+}
+
+.episodes-wrapper {
+    background-attachment: fixed;
+    background-position: 0 3.3em;
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 100vh;
+    padding-top: 1em
+}
+
+.season-navigation li {
+    display: inline-block;
+    list-style: none;
+    margin-bottom: 10px;
+}
+
+.season-navigation a, .season-title {
+    background-color: rgba(125, 125, 125, 0.6);
+    color: #eeeeee;
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 3px 10px;
+    text-decoration: none;
+}
+
+.season-navigation a:hover {
+    background-color: rgba(200, 200, 200, 0.9);
+}
+
+.season-list {
+    list-style: none;
+    overflow-x: hidden;
+    width: 40%;
+}
+
+.season-list li {
+    list-style: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.season-list a {
+    color: inherit;
+    padding: 0 7px;
+    text-decoration: none;
+}
+
+.episode-list {
+    padding-left: 0;
+}
+.episode-link-present{
+    color: #63b0fc;
+}
+
+.episode-link-present > a:VISITED{
+    color: rgb(238, 238, 238);
+}
+
+.episode-link-missing{
+    color: #eeeeee;
+}
+
+.episode-link-missing.selected > a{
+    color: rgb(33, 33, 33);
+    background-color: #eeeeee;
+}
+
+.episode-link-present:not(.selected) a,
+.episode-link-missing a{
+    margin-left: 40px;
+}
+
+.episode-link-present.selected > a:not(#episode-play-link){
+    color: rgb(33, 33, 33);
+    background-color: #63b0fc;
+}
+
+#episode-play-link{
+    background-color: #eeeeee;
+    color: #666666;
+    font-size: 14px;
+    padding: 3px 10px 5px 13px;
+}
+
+#episode-details{
+    display: none;
+    position: fixed;
+    top: 150px;
+    right: 0;
+    margin-right: 30px;
+    background-color: rgba(33, 33, 33, 0.8);
+    color: #EEEEEE;
+    padding: 10px;
+    width: 50%;
+    z-index: 1;
+    overflow: hidden;
+}
+#episode-details>h1{
+    font-size: 1em;
+    text-align: left;
+}
+
+#episode-play-link:HOVER {
+    background-color: #666666;
+    color: #eeeeee;
+}
+
+.modal-body > .container, .modal-body > .container-fluid {
+    margin: 0;
+}
