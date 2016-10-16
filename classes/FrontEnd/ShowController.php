@@ -2,36 +2,14 @@
 
 namespace TinyMediaCenter\FrontEnd;
 
-use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 /**
  * Class ShowController
  */
-class ShowController
+class ShowController extends AbstractController
 {
-    /** @var  Container */
-    private $container;
-
-    /** @var  RestApi */
-    private $api;
-
-    /** @var  string */
-    private $host;
-
-    /**
-     * ShowController constructor.
-     *
-     * @param Container $container
-     */
-    public function __construct(Container $container)
-    {
-        $this->container = $container;
-        $this->api = $container['api'];
-        $this->host = $container['host'];
-    }
-
     /**
      * @param Request  $request
      * @param Response $response
@@ -80,7 +58,7 @@ class ShowController
             $data = $this->api->getEpisodeDescription($category, $id);
             $data['link'] = $_GET['link'];
 
-            $this->container->view->render(
+            $this->twig->render(
                 $response,
                 "shows/details/episodeDetailsAjax.html.twig",
                 $data
@@ -100,11 +78,11 @@ class ShowController
     {
         try {
             if (empty($id)) {
-                $data = $this->api->getCategoryOverview($category);
-                $title = ucfirst($category);
+                $data   = $this->api->getCategoryOverview($category);
+                $title  = ucfirst($category);
                 $target = $this->host;
 
-                $this->container->view->render(
+                $this->twig->render(
                     $response,
                     'shows/overview/page.html.twig',
                     [
@@ -113,15 +91,15 @@ class ShowController
                         'target'         => $target,
                         'overview'       => $data,
                         'showEditButton' => false,
-                        'categories'     => $this->container->categories,
+                        'categories'     => $this->getNavigationCategories(),
                     ]
                 );
             } else {
-                $data = $this->api->getShowDetails($category, $id);
-                $title = $data["title"];
+                $data   = $this->api->getShowDetails($category, $id);
+                $title  = $data["title"];
                 $target = $this->host."/shows/".$category."/";
 
-                $this->container->view->render(
+                $this->twig->render(
                     $response,
                     'shows/details/page.html.twig',
                     [
@@ -134,7 +112,7 @@ class ShowController
                         'showData'       => $data['seasons'],
                         "tvdbId"         => $data["tvdbId"],
                         "url"            => "http://".$this->host.'/shows/'.$category.'/edit/'.$id.'/',
-                        'categories'     => $this->container->categories,
+                        'categories'     => $this->getNavigationCategories(),
                     ]
                 );
             }

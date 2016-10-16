@@ -2,36 +2,14 @@
 
 namespace TinyMediaCenter\FrontEnd;
 
-use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 /**
  * Class SetupController
  */
-class SetupController
+class SetupController extends AbstractController
 {
-    /** @var  Container */
-    private $container;
-
-    /** @var  RestApi */
-    private $api;
-
-    /** @var  string */
-    private $host;
-
-    /**
-     * SetupController constructor.
-     *
-     * @param Container $container
-     */
-    public function __construct(Container $container)
-    {
-        $this->container = $container;
-        $this->api = $container['api'];
-        $this->host = $container['host'];
-    }
-
     /**
      * @param Request  $request
      * @param Response $response
@@ -50,7 +28,7 @@ class SetupController
             $apiConfig = $this->api->getConfig();
         }
 
-        $this->container->view->render(
+        $this->twig->render(
             $response,
             "settings/page.html.twig",
             [
@@ -59,7 +37,7 @@ class SetupController
                 'target'     => $this->host,
                 'config'     => $config,
                 'apiConfig'  => $apiConfig,
-                'categories' => $this->container->categories,
+                'categories' => $this->getNavigationCategories(),
             ]
         );
     }
