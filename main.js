@@ -18,10 +18,13 @@ sections["shows"] = (function(){
 			id = $(this).find('a').data('id');
 			if ($(this).hasClass('episode-link-present')){
 				link = $(this).find('a').data('href');
-				$(this).prepend("<a id='episode-play-link' href='" + link + "' target='_blank' title='Play'>&#9654;</a>");
+				$(this).prepend("<a id='episode-play-link' href='" + link + "' target='_blank' title='Play'><i class='fa fa-play'></i></a>");
 			}
 			$.ajax({
 				url: 'http://' + host + '/shows/' + category + '/episodes/' + id + '/',
+                data: {
+				    link: link
+                },
 				success: function(data){
 					$('#episode-details').html(data);
 				},
@@ -30,13 +33,18 @@ sections["shows"] = (function(){
 				}
 			});
 		});
+
+        $('.container-fluid')
+            .on('click', '#episode-details-close-btn', function() {
+                $('#episode-details').hide();
+            });
 		
 		$('.episodes-wrapper')
 		.off('scroll')
 		.on('scroll', function(e){
-			var top = $('.season-list > li:first').offset().top,
+			var top = $('#season-list').offset().top,
 				titleHeight = $('.navbar').outerHeight(true),
-				offset = $('.season-list > li:first > span').outerHeight(true),
+				offset = $('.season-list').outerHeight(true),
 				mh = $('.episodes-wrapper').innerHeight() - offset;
 
 			if (top > titleHeight){

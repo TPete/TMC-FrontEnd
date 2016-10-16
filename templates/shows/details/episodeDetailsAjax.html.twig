@@ -1,2 +1,17 @@
-<h1>{{ title }}</h1>
-<p>{{ description }}</p>
+<div class="card">
+    <div class="card-header">
+        <a id="episode-details-close-btn" href="#" class="link-secondary pull-xs-right">
+            <i class="fa fa-close fa-2x"></i>
+        </a>
+        <h4 class="card-title">{{ title }}</h4>
+        <h6 class="card-subtitle text-muted">Folge {{ episode }}</h6>
+    </div>
+    <div class="card-block">
+        <p class="card-text">{{ description }}</p>
+        {% if link is not null %}
+            <a href="{{ link }}" class="btn btn-primary btn-md pull-xs-right">
+                <i class="fa fa-play"></i>
+            </a>
+        {% endif %}
+    </div>
+</div>

@@ -239,6 +239,7 @@ $app
                 function (Request $request, Response $response, $category, $id) use ($app, $api, $host) {
                     try {
                         $data = $api->getEpisodeDescription($category, $id);
+                        $data['link'] = $_GET['link'];
 
                         $this->view->render(
                             $response,

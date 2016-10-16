@@ -8,7 +8,7 @@
             {% endfor %}
         </ul>
     {% endif %}
-    <ul class='season-list'>
+    <ul id='season-list' class="col-md-5 col-sm-6">
         {% for season in showData %}
         <li>
             <span class='season-title' id="{{ season["title"]  }}-link">
@@ -20,7 +20,7 @@
                     {% set link = episode["link"] is not empty ? episode["link"] : "" %}
 
                     <li class="{{  class }}">
-                        <a href='javascript:void(0)' title='{{ episode["label"]  }}'
+                        <a class="episode-link" href='javascript:void(0)' title='{{ episode["label"]  }}'
                            data-id='{{ episode["id"] }}' data-href='{{ link }}'>
                             {{ episode["label"] }}
                         </a>
@@ -30,6 +30,8 @@
         </li>
         {% endfor %}
     </ul>
-    <div id='episode-details'>
+    <div id="episode-details-wrapper" class="offset-md-5 col-md-7 offset-sm-6 col-sm-6 hidden-xs-down pos-f-t">
+        <div id="episode-details">
+        </div>
     </div>
 </div>

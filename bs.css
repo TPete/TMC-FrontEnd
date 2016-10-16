@@ -1,10 +1,10 @@
-html, body{
+html, body {
     height: 100%;
     font-family: Verdana, Arial, sans-serif;
     color: #626262;
 }
 
-body{
+body {
     margin: 0;
     background-color: #b2d7e8;
     height: 100%;
@@ -14,10 +14,6 @@ body{
     margin-top: 3.3em;
 }
 
-.teaser-main {
-    padding: 0 1em;
-}
-
 .episodes-wrapper {
     background-attachment: fixed;
     background-position: 0 3.3em;
@@ -25,6 +21,10 @@ body{
     background-size: cover;
     min-height: 100vh;
     padding-top: 1em
+}
+
+.season-navigation {
+    padding-left: 15px;
 }
 
 .season-navigation li {
@@ -46,78 +46,81 @@ body{
     background-color: rgba(200, 200, 200, 0.9);
 }
 
-.season-list {
-    list-style: none;
-    overflow-x: hidden;
-    width: 40%;
-}
-
-.season-list li {
+#season-list li {
     list-style: none;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.season-list a {
-    color: inherit;
-    padding: 0 7px;
-    text-decoration: none;
+#season-list:HOVER a.episode-link {
+    background-color: rgba(33, 33, 33, 0.8);
 }
 
 .episode-list {
     padding-left: 0;
 }
-.episode-link-present{
-    color: #63b0fc;
+
+.episode-list li {
+    list-style: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.episode-link-present > a:VISITED{
-    color: rgb(238, 238, 238);
-}
-
-.episode-link-missing{
-    color: #eeeeee;
-}
-
-.episode-link-missing.selected > a{
-    color: rgb(33, 33, 33);
-    background-color: #eeeeee;
+.episode-list a {
+    text-decoration: none;
 }
 
 .episode-link-present:not(.selected) a,
-.episode-link-missing a{
-    margin-left: 40px;
+.episode-link-missing a {
+    margin-left: 41px;
+    padding: 5px;
 }
 
-.episode-link-present.selected > a:not(#episode-play-link){
+.episode-link-present > a {
+    color: #63b0fc;
+    padding: 5px;
+}
+
+#season-list .episode-link-present > a:HOVER,
+#season-list .episode-link-present.selected > a:not(#episode-play-link) {
     color: rgb(33, 33, 33);
     background-color: #63b0fc;
 }
 
-#episode-play-link{
-    background-color: #eeeeee;
-    color: #666666;
-    font-size: 14px;
-    padding: 3px 10px 5px 13px;
+.episode-link-missing > a {
+    color: #eeeeee;
 }
 
-#episode-details{
-    display: none;
-    position: fixed;
+#season-list .episode-link-missing > a:HOVER,
+#season-list .episode-link-missing.selected > a {
+    color: rgb(33, 33, 33);
+    background-color: #eeeeee;
+}
+
+#episode-play-link {
+    background-color: #eeeeee;
+    color: #666666;
+    padding: 4px 10px 2px 13px;
+}
+
+#episode-details-wrapper {
     top: 150px;
-    right: 0;
-    margin-right: 30px;
-    background-color: rgba(33, 33, 33, 0.8);
-    color: #EEEEEE;
-    padding: 10px;
-    width: 50%;
+}
+
+#episode-details {
+    display: none;
     z-index: 1;
     overflow: hidden;
 }
-#episode-details>h1{
-    font-size: 1em;
-    text-align: left;
+
+#episode-details .card {
+    background-color: rgba(255, 255, 255, 0.85);
+}
+
+#episode-details .card-header {
+    background-color: rgba(255, 255, 255, 0.9);
 }
 
 #episode-play-link:HOVER {
@@ -127,4 +130,12 @@ body{
 
 .modal-body > .container, .modal-body > .container-fluid {
     margin: 0;
+}
+
+a.link-secondary {
+    color: #666666;
+}
+
+a.link-secondary:HOVER {
+    color: #444444;
 }
