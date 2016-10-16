@@ -88,120 +88,19 @@ $app->get(
     }
 );
 
-$app->get(
-    '/install/',
-    function (Request $request, Response $response) use ($app, $host, $api) {
-        $file = "config.json";
-        $knowsAPI = true;
-        if (!file_exists($file)) {
-            $file     = "example_config.json";
-            $knowsAPI = false;
+$app
+    ->group(
+        '/install/',
+        function () {
+            $this->get('', '\TinyMediaCenter\FrontEnd\SetupController:indexAction');
+
+            $this->post('', '\TinyMediaCenter\FrontEnd\SetupController:updateAction');
+
+            $this->post('db/', '\TinyMediaCenter\FrontEnd\SetupController:setupDbAction');
+
+            $this->get('check/{type}/', '\TinyMediaCenter\FrontEnd\SetupController:checkAction');
         }
-        $config = FrontEnd\Util::readJSONFile($file);
-        $apiConfig = [];
-        if ($knowsAPI && $api->isValid()) {
-            $apiConfig = $api->getConfig();
-        }
-
-        $this->view->render(
-            $response,
-            "settings/page.html.twig",
-            [
-                'host'       => $host,
-                'title'      => 'Einstellungen',
-                'target'     => $host,
-                'config'     => $config,
-                'apiConfig'  => $apiConfig,
-                'categories' => $this->categories,
-            ]
-        );
-    }
-);
-
-$app->post(
-    '/install/',
-    function (Request $request, Response $response) use ($app, $host, $api) {
-        $config = ["restUrl" => $_POST["restUrl"]];
-        FrontEnd\Util::writeJSONFile("config.json", $config);
-
-        if (isset($_POST["pathMovies"])) {
-            $config = [
-                "pathMovies"  => $_POST["pathMovies"],
-                "aliasMovies" => $_POST["aliasMovies"],
-                "pathShows"   => $_POST["pathShows"],
-                "aliasShows"  => $_POST["aliasShows"],
-                "dbHost"      => $_POST["dbHost"],
-                "dbName"      => $_POST["dbName"],
-                "dbUser"      => $_POST["dbUser"],
-                "dbPassword"  => $_POST["dbPassword"],
-                "TMDBApiKey"  => $_POST["TMDBApiKey"],
-                "TTVDBApiKey" => $_POST["TTVDBApiKey"],
-            ];
-
-            $api->updateConfig($config);
-        }
-
-        $uri = 'http://'.$host.'/install/';
-
-        return $response->withRedirect($uri, 301);
-    }
-);
-
-$app->get(
-    '/install/check/{type}/',
-    function (Request $request, Response $response, $type) {
-        if ($type === "restUrl") {
-            $api = new FrontEnd\RestAPI($_GET["restUrl"]);
-            $res['result'] = $api->isValid() ? "Ok" : "Error";
-
-            echo json_encode($res);
-        }
-        if ($type === "db") {
-            $api = new FrontEnd\RestAPI($_GET["restUrl"]);
-            $args = [
-                "host"     => $_GET["dbHost"],
-                "name"     => $_GET["dbName"],
-                "user"     => $_GET["dbUser"],
-                "password" => $_GET["dbPassword"],
-            ];
-            if ($api->isValid()) {
-                $res = $api->check("db", $args);
-            } else {
-                $res['result'] = 'Error';
-            }
-            echo json_encode($res);
-        }
-        if ($type === "movies") {
-            $api = new FrontEnd\RestAPI($_GET["restUrl"]);
-            $args = [
-                "pathMovies"  => $_GET["pathMovies"],
-                "aliasMovies" => $_GET["aliasMovies"],
-            ];
-            $res = $api->check("movies", $args);
-
-            echo json_encode($res);
-        }
-        if ($type === "shows") {
-            $api = new FrontEnd\RestAPI($_GET["restUrl"]);
-            $args = [
-                "pathShows"  => $_GET["pathShows"],
-                "aliasShows" => $_GET["aliasShows"],
-            ];
-            $res = $api->check("shows", $args);
-
-            echo json_encode($res);
-        }
-    }
-);
-
-$app->post(
-    '/install/db/',
-    function (Request $request, Response $response) use ($app, $host, $api) {
-        $api->setupDB();
-
-        return $response->withRedirect("http://".$host."/install/", 301);
-    }
-);
+    );
 
 $app
     ->group(
