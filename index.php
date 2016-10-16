@@ -44,7 +44,8 @@ $config = FrontEnd\Util::getConfig();
 
 $api = new FrontEnd\RestApi($config["restUrl"]);
 
-// Add nav categoires
+$container['api']        = $api;
+$container['host']       = $host;
 $container['categories'] = $api->getCategories();
 
 //Redirect url ending in non-trailing slash to trailing equivalent
@@ -205,101 +206,14 @@ $app->post(
 $app
     ->group(
         '/shows',
-        function () use ($app, $host, $api) {
-            $app->post(
-                '/update/',
-                function (Request $request, Response $response) use ($app, $host, $api) {
-                    try {
-                        $res = $api->updateShows();
+        function () {
+            $this->post('/update/', '\TinyMediaCenter\FrontEnd\ShowController:updateAction');
 
-                        echo $res["protocol"];
-                    } catch (FrontEnd\RemoteException $exp) {
-                        FrontEnd\Util::renderException($exp, $host, $this, $response);
-                    }
-                }
-            );
+            $this->post('/{category}/edit/{id}/', '\TinyMediaCenter\FrontEnd\ShowController:updateShowAction');
 
-            $app->post(
-                '/{category}/edit/{id}/',
-                function (Request $request, Response $response, $category, $id) use ($app, $api, $host) {
-                    try {
-                        $api->updateShowDetails($category, $id, $_POST["title"], $_POST["tvdbId"], $_POST["lang"]);
+            $this->get('/{category}/episodes/{id}/', '\TinyMediaCenter\FrontEnd\ShowController:getEpisodeDescriptionAction');
 
-                        $url = "http://".$host.'/shows/'.$category.'/'.$id;
-
-                        return $response->withRedirect($url, 302);
-                    } catch (FrontEnd\RemoteException $exp) {
-                        FrontEnd\Util::renderException($exp, $host, $this, $response);
-                    }
-                }
-            );
-
-            $app->get(
-                '/{category}/episodes/{id}/',
-                function (Request $request, Response $response, $category, $id) use ($app, $api, $host) {
-                    try {
-                        $data = $api->getEpisodeDescription($category, $id);
-                        $data['link'] = $_GET['link'];
-
-                        $this->view->render(
-                            $response,
-                            "shows/details/episodeDetailsAjax.html.twig",
-                            $data
-                        );
-                    } catch (FrontEnd\RemoteException $exp) {
-                        FrontEnd\Util::renderException($exp, $host, $this, $response);
-                    }
-                }
-            );
-
-            $this->get(
-                '/{category}/[{id}/]',
-                function (Request $request, Response $response, $category, $id) use ($app, $host, $api) {
-                    try {
-                        if (empty($id)) {
-                            $data   = $api->getCategoryOverview($category);
-                            $title  = ucfirst($category);
-                            $target = $host;
-
-                            $this->view->render(
-                                $response,
-                                'shows/overview/page.html.twig',
-                                [
-                                    'host'           => $host,
-                                    'title'          => $title,
-                                    'target'         => $target,
-                                    'overview'       => $data,
-                                    'showEditButton' => false,
-                                    'categories'     => $this->categories,
-                                ]
-                            );
-                        } else {
-                            $data   = $api->getShowDetails($category, $id);
-                            $title  = $data["title"];
-                            $target = $host."/shows/".$category."/";
-
-                            $this->view->render(
-                                $response,
-                                'shows/details/page.html.twig',
-                                [
-                                    'host'           => $host,
-                                    'title'          => $title,
-                                    'target'         => $target,
-                                    'overview'       => $data,
-                                    'showEditButton' => true,
-                                    'imageUrl'       => $data['imageUrl'],
-                                    'showData'       => $data['seasons'],
-                                    "tvdbId"         => $data["tvdbId"],
-                                    "url"            => "http://".$host.'/shows/'.$category.'/edit/'.$id.'/',
-                                    'categories'     => $this->categories,
-                                ]
-                            );
-                        }
-                    } catch (FrontEnd\RemoteException $exp) {
-                        FrontEnd\Util::renderException($exp, $host, $this, $response);
-                    }
-                }
-            );
+            $this->get('/{category}/[{id}/]', '\TinyMediaCenter\FrontEnd\ShowController:showAction');
         }
     )
 ->add($checkAPI($api, $host));
