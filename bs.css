@@ -6,12 +6,17 @@ html, body {
 
 body {
     margin: 0;
-    background-color: #b2d7e8;
+    background-color: #c9e2e8;
     height: 100%;
 }
 
 .container, .container-fluid {
     margin-top: 3.3em;
+}
+
+.show-list {
+    min-height: 100vh;
+    padding-top: 1em
 }
 
 .episodes-wrapper {
