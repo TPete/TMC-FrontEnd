@@ -72,7 +72,7 @@ $checkAPI = function (FrontEnd\RestApi $api, $host) {
     };
 };
 
-
+// Main index page
 $app->get(
     '/',
     function (Request $request, Response $response) use ($app, $host, $api) {
@@ -88,26 +88,28 @@ $app->get(
     }
 );
 
+// setup/config
 $app
     ->group(
-        '/install/',
+        '/install',
         function () {
-            $this->get('', '\TinyMediaCenter\FrontEnd\SetupController:indexAction');
+            $this->get('/', '\TinyMediaCenter\FrontEnd\SetupController:indexAction');
 
-            $this->post('', '\TinyMediaCenter\FrontEnd\SetupController:updateAction');
+            $this->post('/', '\TinyMediaCenter\FrontEnd\SetupController:updateAction');
 
-            $this->post('db/', '\TinyMediaCenter\FrontEnd\SetupController:setupDbAction');
+            $this->post('/db/', '\TinyMediaCenter\FrontEnd\SetupController:setupDbAction');
 
-            $this->get('check/{type}/', '\TinyMediaCenter\FrontEnd\SetupController:checkAction');
+            $this->get('/check/{type}/', '\TinyMediaCenter\FrontEnd\SetupController:checkAction');
+
+            $this->post('/update-db/type/{type}/', '\TinyMediaCenter\FrontEnd\SetupController:updateLibraryAction');
         }
     );
 
+// shows
 $app
     ->group(
         '/shows',
         function () {
-            $this->post('/update/', '\TinyMediaCenter\FrontEnd\ShowController:updateAction');
-
             $this->post('/{category}/edit/{id}/', '\TinyMediaCenter\FrontEnd\ShowController:updateShowAction');
 
             $this->get('/{category}/episodes/{id}/', '\TinyMediaCenter\FrontEnd\ShowController:getEpisodeDescriptionAction');
@@ -117,13 +119,12 @@ $app
     )
 ->add($checkAPI($api, $host));
 
+// movies
 $app
     ->group(
         '/movies',
         function () use ($app, $host, $api) {
             $app->get('/{category}/', '\TinyMediaCenter\FrontEnd\MovieController:movieAction');
-
-            $app->post('/update/', '\TinyMediaCenter\FrontEnd\MovieController:updateAction');
 
             $app->get('/{category}/lookup/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:lookupAction');
 

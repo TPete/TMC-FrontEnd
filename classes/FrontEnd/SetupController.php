@@ -11,24 +11,30 @@ use Slim\Http\Response;
 class SetupController extends AbstractController
 {
     /**
+     * Get the index page.
+     *
      * @param Request  $request
      * @param Response $response
+     *
+     * @return Response
      */
     public function indexAction(Request $request, Response $response)
     {
         $file     = "config.json";
-        $knowsAPI = true;
-        if (!file_exists($file)) {
-            $file     = "example_config.json";
-            $knowsAPI = false;
+        $knowsAPI = file_exists($file);
+
+        if (false === $knowsAPI) {
+            $file = "example_config.json";
         }
+
         $config = Util::readJSONFile($file);
         $apiConfig = [];
+
         if ($knowsAPI && $this->api->isValid()) {
             $apiConfig = $this->api->getConfig();
         }
 
-        $this->twig->render(
+        return $this->twig->render(
             $response,
             "settings/page.html.twig",
             [
@@ -43,6 +49,8 @@ class SetupController extends AbstractController
     }
 
     /**
+     * Update application configuration.
+     *
      * @param Request  $request
      * @param Response $response
      *
@@ -130,6 +138,8 @@ class SetupController extends AbstractController
     }
 
     /**
+     * Perform initial DB setup.
+     *
      * @param Request  $request
      * @param Response $response
      *
@@ -140,5 +150,29 @@ class SetupController extends AbstractController
         $this->api->setupDB();
 
         return $response->withRedirect("http://".$this->host."/install/", 301);
+    }
+
+    /**
+     * Update library data.
+     *
+     * @param Request  $request
+     * @param Response $response
+     * @param string   $type
+     */
+    public function updateLibraryAction(Request $request, Response $response, $type)
+    {
+        try {
+            if ($type === 'movies') {
+                $res = $this->api->updateMovies();
+
+                echo $res['protocol'];
+            } elseif ($type === 'shows') {
+                $res = $this->api->updateShows();
+
+                echo $res['protocol'];
+            }
+        } catch (RemoteException $exp) {
+            Util::renderException($exp, $this->host, $this->container, $response);
+        }
     }
 }

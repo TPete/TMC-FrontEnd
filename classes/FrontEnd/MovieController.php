@@ -13,21 +13,6 @@ class MovieController extends AbstractController
     /**
      * @param Request  $request
      * @param Response $response
-     */
-    public function updateAction(Request $request, Response $response)
-    {
-        try {
-            $res = $this->api->updateMovies();
-
-            echo $res["protocol"];
-        } catch (RemoteException $exp) {
-            Util::renderException($exp, $this->host, $this->container, $response);
-        }
-    }
-
-    /**
-     * @param Request  $request
-     * @param Response $response
      * @param string   $category
      */
     public function movieAction(Request $request, Response $response, $category)
