@@ -62,10 +62,10 @@ $app->add(function (Request $request, Response $response, callable $next) {
 });
 
 //Route middleware, added to "show" and "movies" groups
-$checkAPI = function (FrontEnd\RestApi $api, $host) {
+$checkAPI = function () use ($api, $host) {
     return function (Request $request, Response $response, $next) use ($api, $host) {
         if (false === $api->isValid()) {
-            return $response->withRedirect('https://'.$host.'/install/', 301);
+            return $response->withRedirect('http://'.$host.'/install/', 301);
         }
 
         return $next($request, $response);
@@ -75,7 +75,7 @@ $checkAPI = function (FrontEnd\RestApi $api, $host) {
 // Main index page
 $app->get(
     '/',
-    function (Request $request, Response $response) use ($app, $host, $api) {
+    function (Request $request, Response $response) use ($host) {
         return $this->view->render(
             $response,
             'main/page.html.twig',
@@ -119,24 +119,24 @@ $app
             $this->get('/episodes/{id}/', '\TinyMediaCenter\FrontEnd\ShowController:getEpisodeDescriptionAction');
         }
     )
-->add($checkAPI($api, $host));
+->add($checkAPI());
 
 // movies
 $app
     ->group(
         '/movies/{category}',
-        function () use ($app, $host, $api) {
-            $app->get('/', '\TinyMediaCenter\FrontEnd\MovieController:movieAction');
+        function () {
+            $this->get('/', '\TinyMediaCenter\FrontEnd\MovieController:movieAction');
 
-            $app->get('/lookup/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:lookupAction');
+            $this->get('/lookup/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:lookupAction');
 
-            $app->get('/genres/', '\TinyMediaCenter\FrontEnd\MovieController:genresAction');
+            $this->get('/genres/', '\TinyMediaCenter\FrontEnd\MovieController:genresAction');
 
-            $app->get('/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:editAction');
+            $this->get('/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:editAction');
 
-            $app->post('/{dbid}/', '\TinyMediaCenter\FrontEnd\MovieController:updateMovieAction');
+            $this->post('/{dbid}/', '\TinyMediaCenter\FrontEnd\MovieController:updateMovieAction');
         }
     )
-->add($checkAPI($api, $host));
+->add($checkAPI());
 
 $app->run();

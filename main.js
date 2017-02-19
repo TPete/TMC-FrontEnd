@@ -41,19 +41,22 @@ sections["shows"] = (function(){
 		
 		$('.episodes-wrapper')
 		.off('scroll')
-		.on('scroll', function(e){
+		.on('scroll', function(){
 			var top = $('#season-list').offset().top,
 				titleHeight = $('.navbar').outerHeight(true),
 				offset = $('.season-list').outerHeight(true),
-				mh = $('.episodes-wrapper').innerHeight() - offset;
+				mh = $('.episodes-wrapper').innerHeight() - offset,
+				episodeDetails = $('#episode-details');
 
 			if (top > titleHeight){
-				$('#episode-details').css('top', (top + offset) + 'px');
-				$('#episode-details').css('max-height', (mh - top) + 'px');
+                episodeDetails
+					.css('top', (top + offset) + 'px')
+					.css('max-height', (mh - top) + 'px');
 			}
 			else{
-				$('#episode-details').css('top', (titleHeight + offset) + 'px');
-				$('#episode-details').css('max-height', (mh - titleHeight) + 'px');
+                episodeDetails
+					.css('top', (titleHeight + offset) + 'px')
+					.css('max-height', (mh - titleHeight) + 'px');
 			}
 		}).
 		trigger('scroll');
@@ -366,7 +369,6 @@ sections['install'] = (function(){
 								msg = 'Alle erforderlichen Datenbanktabellen sind vorhanden.';
 							}
 							else{
-							    //TODO show dialog
 								msg = 'Die Datenbankeinrichtung ist unvollständig. Soll die Datenbank jetzt eingerichtet werden?';
 								msg += '<br><form method="POST" action="install/db" id="install-db-form"><button type="submit">Setup DB</button></form>'
 							}
