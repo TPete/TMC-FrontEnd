@@ -5,7 +5,10 @@
 {% endblock %}
 
 {% block dialogs %}
-    {% include "movies/searchDialog.html.twig" %}
+    {% include "movies/searchDialog.html.twig" with {
+        'lists': lists,
+        'collections': collections
+    } only %}
 {% endblock %}
 
 {% block header_bar %}
@@ -13,5 +16,7 @@
 {% endblock %}
 
 {% block content %}
-    {% include "movies/movieWrapper.html.twig" %}
+    {% include "movies/movieWrapper.html.twig" with {
+        'movies': movies
+    } only %}
 {% endblock %}

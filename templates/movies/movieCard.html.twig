@@ -1,0 +1,69 @@
+<div class="row movie-row">
+    <div class="col-xs-12 col-sm-6 col-md-3">
+        <img src="{{ poster }}" class="img-fluid">
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-9">
+        <div class="movie-card">
+            <h1 class="movie-card-header hidden-xs-down">
+                {{ title }}
+            </h1>
+            <h2 class="movie-card-header hidden-sm-up">
+                {{ title }}
+            </h2>
+            <div class="movie-card-block">
+                <p class="movie-card-block-description">
+                    {{ overview }}
+                </p>
+                {% if collection_name|length > 0 %}
+                    <p>
+                        Teil der <a href="?collection={{ collection_id }}">{{ collection_name }}</a>
+                    </p>
+                {% endif %}
+                {#{% for list in lists %}#}
+                    {#<p>#}
+                        {#Teil der <a href="?list={{ list["list_id"] }}">{{ list["list_name"] }}</a> Liste#}
+                    {#</p>#}
+                {#{% endfor %}#}
+                <div class="row">
+                    <div class="col-md-2 col-xs-4 float-xs-right">
+                        <a href="{{ filename }}" type="button" class="btn btn-primary btn-block mb">
+                            <i class="fa fa-play"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card-footer">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-md-4">Jahr/Land</dt>
+                            <dd class="col-md-8">{{ year~" / "~countries }}</dd>
+                            <dt class="col-md-4">Genres</dt>
+                            <dd class="col-md-8">
+                                {% for genre in genres %}
+                                    <a href="?genres={{ genre }}" class="btn btn-outline-info">{{ genre }}</a>
+                                {% endfor %}
+                            </dd>
+                            <dt class="col-md-4">Darsteller</dt>
+                            <dd class="col-md-8">
+                                {% for actor in actors %}
+                                    <a href="?filter={{ actor }}" class="btn btn-outline-info">{{ actor|raw }}</a>
+                                {% endfor %}
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-md-3">Regie</dt>
+                            <dd class="col-md-9">
+                                <a href="?filter={{ director|url_encode }}" class="btn btn-outline-info">{{ director }}</a>
+                            </dd>
+                            <dt class="col-md-3">Info</dt>
+                            <dd class="col-md-9">{{ info|raw }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
