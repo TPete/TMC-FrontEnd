@@ -108,13 +108,15 @@ $app
 // shows
 $app
     ->group(
-        '/shows',
+        '/shows/{category}',
         function () {
-            $this->post('/{category}/edit/{id}/', '\TinyMediaCenter\FrontEnd\ShowController:updateShowAction');
+            $this->get('/', '\TinyMediaCenter\FrontEnd\ShowController:indexAction');
 
-            $this->get('/{category}/episodes/{id}/', '\TinyMediaCenter\FrontEnd\ShowController:getEpisodeDescriptionAction');
+            $this->get('/{id}/', '\TinyMediaCenter\FrontEnd\ShowController:detailsAction');
 
-            $this->get('/{category}/[{id}/]', '\TinyMediaCenter\FrontEnd\ShowController:showAction');
+            $this->post('/{id}/', '\TinyMediaCenter\FrontEnd\ShowController:updateShowAction');
+
+            $this->get('/episodes/{id}/', '\TinyMediaCenter\FrontEnd\ShowController:getEpisodeDescriptionAction');
         }
     )
 ->add($checkAPI($api, $host));
@@ -122,17 +124,17 @@ $app
 // movies
 $app
     ->group(
-        '/movies',
+        '/movies/{category}',
         function () use ($app, $host, $api) {
-            $app->get('/{category}/', '\TinyMediaCenter\FrontEnd\MovieController:movieAction');
+            $app->get('/', '\TinyMediaCenter\FrontEnd\MovieController:movieAction');
 
-            $app->get('/{category}/lookup/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:lookupAction');
+            $app->get('/lookup/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:lookupAction');
 
-            $app->get('/{category}/genres/', '\TinyMediaCenter\FrontEnd\MovieController:genresAction');
+            $app->get('/genres/', '\TinyMediaCenter\FrontEnd\MovieController:genresAction');
 
-            $app->get('/{category}/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:editAction');
+            $app->get('/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:editAction');
 
-            $app->post('/{category}/{dbid}/', '\TinyMediaCenter\FrontEnd\MovieController:updateMovieAction');
+            $app->post('/{dbid}/', '\TinyMediaCenter\FrontEnd\MovieController:updateMovieAction');
         }
     )
 ->add($checkAPI($api, $host));

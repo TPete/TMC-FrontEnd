@@ -14,6 +14,8 @@ class MovieController extends AbstractController
      * @param Request  $request
      * @param Response $response
      * @param string   $category
+     *
+     * @return Response
      */
     public function movieAction(Request $request, Response $response, $category)
     {
@@ -52,13 +54,14 @@ class MovieController extends AbstractController
                 'categories'    => $this->container['categories'],
                 'title'         => $category,
             ];
-            $this->twig->render(
+
+            return $this->twig->render(
                 $response,
                 "movies/page.html.twig",
                 $data
             );
         } catch (RemoteException $exp) {
-            Util::renderException($exp, $this->host, $this->container, $response);
+            return Util::renderException($exp, $this->host, $this->container, $response);
         }
     }
 
@@ -67,6 +70,8 @@ class MovieController extends AbstractController
      * @param Response $response
      * @param string   $category
      * @param int      $id
+     *
+     * @return Response
      */
     public function lookupAction(Request $request, Response $response, $category, $id)
     {
@@ -74,7 +79,7 @@ class MovieController extends AbstractController
             $movie = $this->api->lookupMovie($_GET["movieDBID"]);
 
             if ($movie !== null) {
-                $this->twig->render(
+                return $this->twig->render(
                     $response,
                     "movies/movieDetailsDialog.html.twig",
                     [
@@ -86,7 +91,7 @@ class MovieController extends AbstractController
                 echo "No Match";
             }
         } catch (RemoteException $exp) {
-            Util::renderException($exp, $this->host, $this->container, $response);
+            return Util::renderException($exp, $this->host, $this->container, $response);
         }
     }
 

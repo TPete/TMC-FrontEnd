@@ -27,7 +27,7 @@ class ShowController extends AbstractController
 
             return $response->withRedirect($url, 302);
         } catch (RemoteException $exp) {
-            Util::renderException($exp, $this->host, $this->container, $response);
+            return Util::renderException($exp, $this->host, $this->container, $response);
         }
     }
 
@@ -36,6 +36,8 @@ class ShowController extends AbstractController
      * @param Response $response
      * @param string   $category
      * @param string   $id
+     *
+     * @return Response
      */
     public function getEpisodeDescriptionAction(Request $request, Response $response, $category, $id)
     {
@@ -43,13 +45,13 @@ class ShowController extends AbstractController
             $data = $this->api->getEpisodeDescription($category, $id);
             $data['link'] = $_GET['link'];
 
-            $this->twig->render(
+            return $this->twig->render(
                 $response,
                 "shows/details/episodeDetailsAjax.html.twig",
                 $data
             );
         } catch (RemoteException $exp) {
-            Util::renderException($exp, $this->host, $this->container, $response);
+            return Util::renderException($exp, $this->host, $this->container, $response);
         }
     }
 
@@ -57,52 +59,66 @@ class ShowController extends AbstractController
      * @param Request  $request
      * @param Response $response
      * @param string   $category
-     * @param string   $id
+     *
+     * @return Response
      */
-    public function showAction(Request $request, Response $response, $category, $id)
+    public function indexAction(Request $request, Response $response, $category)
     {
         try {
-            if (empty($id)) {
-                $data   = $this->api->getCategoryOverview($category);
-                $title  = ucfirst($category);
-                $target = $this->host;
+            $data   = $this->api->getCategoryOverview($category);
+            $title  = ucfirst($category);
+            $target = $this->host;
 
-                $this->twig->render(
-                    $response,
-                    'shows/overview/page.html.twig',
-                    [
-                        'host'           => $this->host,
-                        'title'          => $title,
-                        'target'         => $target,
-                        'overview'       => $data,
-                        'showEditButton' => false,
-                        'categories'     => $this->getNavigationCategories(),
-                    ]
-                );
-            } else {
-                $data   = $this->api->getShowDetails($category, $id);
-                $title  = $data["title"];
-                $target = $this->host."/shows/".$category."/";
-
-                $this->twig->render(
-                    $response,
-                    'shows/details/page.html.twig',
-                    [
-                        'host'           => $this->host,
-                        'title'          => $title,
-                        'target'         => $target,
-                        'overview'       => $data,
-                        'showEditButton' => true,
-                        'imageUrl'       => $data['imageUrl'],
-                        'showData'       => $data['seasons'],
-                        "tvdbId"         => $data["tvdbId"],
-                        "url"            => "http://".$this->host.'/shows/'.$category.'/edit/'.$id.'/',
-                        'categories'     => $this->getNavigationCategories(),
-                    ]
-                );
-            }
+            return $this->twig->render(
+                $response,
+                'shows/overview/page.html.twig',
+                [
+                    'host'           => $this->host,
+                    'title'          => $title,
+                    'target'         => $target,
+                    'overview'       => $data,
+                    'showEditButton' => false,
+                    'categories'     => $this->getNavigationCategories(),
+                ]
+            );
         } catch (RemoteException $exp) {
-            Util::renderException($exp, $this->host, $this->container, $response);
+            return Util::renderException($exp, $this->host, $this->container, $response);
+        }
+    }
+
+    /**
+     * @param Request  $request
+     * @param Response $response
+     * @param string   $category
+     * @param int      $id
+     *
+     * @return Response
+     */
+    public function detailsAction(Request $request, Response $response, $category, $id)
+    {
+        try {
+            $data   = $this->api->getShowDetails($category, $id);
+            $title  = $data["title"];
+            $target = $this->host."/shows/".$category."/";
+
+            return $this->twig->render(
+                $response,
+                'shows/details/page.html.twig',
+                [
+                    'host'           => $this->host,
+                    'title'          => $title,
+                    'target'         => $target,
+                    'overview'       => $data,
+                    'showEditButton' => true,
+                    'imageUrl'       => $data['imageUrl'],
+                    'showData'       => $data['seasons'],
+                    "tvdbId"         => $data["tvdbId"],
+                    "url"            => "http://".$this->host.'/shows/'.$category.'/'.$id.'/',
+                    'categories'     => $this->getNavigationCategories(),
+                ]
+            );
+        } catch (RemoteException $exp) {
+            return Util::renderException($exp, $this->host, $this->container, $response);
         }
     }
 }

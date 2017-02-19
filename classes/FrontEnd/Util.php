@@ -208,10 +208,12 @@ class Util
      * @param string          $host
      * @param Container       $container
      * @param Response        $response
+     *
+     * @return Response
      */
     public static function renderException(RemoteException $exp, $host, Container $container, Response $response)
     {
-        $container->view->render(
+        return $container->view->render(
             $response,
             'error/page.html.twig',
             [
