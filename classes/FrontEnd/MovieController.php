@@ -10,6 +10,8 @@ use Slim\Http\Response;
  */
 class MovieController extends AbstractController
 {
+    const FETCH_SIZE = 6;
+
     /**
      * @param Request  $request
      * @param Response $response
@@ -26,7 +28,7 @@ class MovieController extends AbstractController
             $offset     = intval($request->getQueryParam("offset", 0));
             $collection = intval($request->getQueryParam("collection", 0));
             $list       = intval($request->getQueryParam("list", 0));
-            $cnt        = 6;
+            $fetchSize  = self::FETCH_SIZE;
 
             if ($collection > 0 or $list > 0) {
                 $filter = "";
@@ -34,7 +36,7 @@ class MovieController extends AbstractController
                 $sort = "name_asc";
             }
 
-            $movies = $this->api->getMovies($category, $sort, $cnt, $offset, $filter, $genres, $collection, $list);
+            $movies = $this->api->getMovies($category, $sort, $fetchSize, $offset, $filter, $genres, $collection, $list);
             $comp = $this->api->getCompilations($category);
 
             $header = $category;
@@ -53,7 +55,17 @@ class MovieController extends AbstractController
                 "collections"   => $comp["collections"],
                 'categories'    => $this->container['categories'],
                 'title'         => $category,
+                'fetchSize'     => $fetchSize,
+                'category'      => $category,
             ];
+
+            if ($request->isXhr()) {
+                return $this->twig->render(
+                    $response,
+                    "movies/movieWrapper.html.twig",
+                    $data
+                );
+            }
 
             return $this->twig->render(
                 $response,

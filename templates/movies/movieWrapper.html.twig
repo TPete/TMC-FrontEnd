@@ -1,19 +1,17 @@
-<div id='nm-movie-details-wrapper'>
-    {% for movie in movies %}
-        {% include "movies/movieCard.html.twig" with {
-            'poster': movie['poster'],
-            'title': movie['title'],
-            'overview': movie['overview'],
-            'poster': movie['poster'],
-            'year': movie['release_date']|slice(0, 4),
-            'countries': movie['countries'],
-            'genres': movie['genres']|slice(0, 3),
-            'actors': movie['actors']|slice(0, 3),
-            'director': movie['director'],
-            'info': movie['info'],
-            'filename': movie['filename'],
-            'collection_id': movie['collection_id'],
-            'collection_name': movie['collection_name'],
-        } %}
-    {% endfor %}
-</div>
+{% for movie in movies %}
+    {% include "movies/movieCard.html.twig" with {
+        'poster': movie['poster'],
+        'title': movie['title'],
+        'overview': movie['overview'],
+        'poster': movie['poster'],
+        'year': movie['release_date']|slice(0, 4),
+        'countries': movie['countries'],
+        'genres': movie['genres']|slice(0, 3),
+        'actors': movie['actors']|slice(0, 3),
+        'director': movie['director'],
+        'info': movie['info'],
+        'filename': movie['filename'],
+        'collection_id': movie['collection_id'],
+        'collection_name': movie['collection_name'],
+    } %}
+{% endfor %}

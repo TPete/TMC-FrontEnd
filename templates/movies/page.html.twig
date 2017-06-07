@@ -4,6 +4,11 @@
     {{ title }}
 {% endblock %}
 
+{% block javascript %}
+    {{ parent() }}
+    <script type="text/javascript" src='http://{{ host }}/js/movies.js?ver=1'></script>
+{% endblock %}
+
 {% block dialogs %}
     {% include "movies/searchDialog.html.twig" with {
         'lists': lists,
@@ -16,7 +21,11 @@
 {% endblock %}
 
 {% block content %}
-    {% include "movies/movieWrapper.html.twig" with {
-        'movies': movies
-    } only %}
+    <div id="nm-movie-details-wrapper" data-fetch-size="{{ fetchSize }}"
+        data-category="{{ category }}" data-sort="{{ sort }}" data-filter="{{ filter }}"
+        data-genres="{{ genres }}" data-collection="{{ collection }}" data-list="{{ list }}">
+        {% include "movies/movieWrapper.html.twig" with {
+            'movies': movies
+        } only %}
+    </div>
 {% endblock %}
