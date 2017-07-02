@@ -2,8 +2,8 @@
 
 namespace TinyMediaCenter\FrontEnd;
 
+use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class MovieController
@@ -13,13 +13,13 @@ class MovieController extends AbstractController
     const FETCH_SIZE = 6;
 
     /**
-     * @param Request  $request
-     * @param Response $response
-     * @param string   $category
+     * @param Request           $request
+     * @param ResponseInterface $response
+     * @param string            $category
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    public function movieAction(Request $request, Response $response, $category)
+    public function movieAction(Request $request, ResponseInterface $response, $category)
     {
         try {
             $sort       = $request->getQueryParam("sort", "name_asc");
@@ -78,14 +78,14 @@ class MovieController extends AbstractController
     }
 
     /**
-     * @param Request  $request
-     * @param Response $response
-     * @param string   $category
-     * @param int      $id
+     * @param Request           $request
+     * @param ResponseInterface $response
+     * @param string            $category
+     * @param int               $id
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    public function lookupAction(Request $request, Response $response, $category, $id)
+    public function lookupAction(Request $request, ResponseInterface $response, $category, $id)
     {
         try {
             $movie = $this->api->lookupMovie($_GET["movieDBID"]);
@@ -108,11 +108,11 @@ class MovieController extends AbstractController
     }
 
     /**
-     * @param Request  $request
-     * @param Response $response
-     * @param string   $category
+     * @param Request           $request
+     * @param ResponseInterface $response
+     * @param string            $category
      */
-    public function genresAction(Request $request, Response $response, $category)
+    public function genresAction(Request $request, ResponseInterface $response, $category)
     {
         try {
             $term = $request->getQueryParam("term", "");
@@ -125,12 +125,12 @@ class MovieController extends AbstractController
     }
 
     /**
-     * @param Request  $request
-     * @param Response $response
-     * @param string   $category
-     * @param int      $id
+     * @param Request           $request
+     * @param ResponseInterface $response
+     * @param string            $category
+     * @param int               $id
      */
-    public function editAction(Request $request, Response $response, $category, $id)
+    public function editAction(Request $request, ResponseInterface $response, $category, $id)
     {
         try {
             $movie  = $this->api->getMovie($category, $id);
@@ -159,12 +159,12 @@ class MovieController extends AbstractController
     }
 
     /**
-     * @param Request  $request
-     * @param Response $response
-     * @param string   $category
-     * @param int      $dbid
+     * @param Request           $request
+     * @param ResponseInterface $response
+     * @param string            $category
+     * @param int               $dbid
      */
-    public function updateMovieAction(Request $request, Response $response, $category, $dbid)
+    public function updateMovieAction(Request $request, ResponseInterface $response, $category, $dbid)
     {
         try {
             echo $this->api->updateMovie($category, $dbid, $_POST["movieDBID"], $_POST["filename"]);

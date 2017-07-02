@@ -2,8 +2,8 @@
 
 namespace TinyMediaCenter\FrontEnd;
 
+use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class SetupController
@@ -13,12 +13,12 @@ class SetupController extends AbstractController
     /**
      * Get the index page.
      *
-     * @param Request  $request
-     * @param Response $response
+     * @param Request           $request
+     * @param ResponseInterface $response
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    public function indexAction(Request $request, Response $response)
+    public function indexAction(Request $request, ResponseInterface $response)
     {
         $file     = "config.json";
         $knowsAPI = file_exists($file);
@@ -51,12 +51,12 @@ class SetupController extends AbstractController
     /**
      * Update application configuration.
      *
-     * @param Request  $request
-     * @param Response $response
+     * @param Request           $request
+     * @param ResponseInterface $response
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    public function updateAction(Request $request, Response $response)
+    public function updateAction(Request $request, ResponseInterface $response)
     {
         $config = ["restUrl" => $_POST["restUrl"]];
         Util::writeJSONFile("config.json", $config);
@@ -80,15 +80,15 @@ class SetupController extends AbstractController
 
         $uri = 'http://'.$this->host.'/install/';
 
-        return $response->withRedirect($uri, 301);
+        return $this->redirect($response, $uri, 301);
     }
 
     /**
-     * @param Request  $request
-     * @param Response $response
-     * @param string   $type
+     * @param Request           $request
+     * @param ResponseInterface $response
+     * @param string            $type
      */
-    public function checkAction(Request $request, Response $response, $type)
+    public function checkAction(Request $request, ResponseInterface $response, $type)
     {
         $types = [
             'restUrl',
@@ -140,26 +140,26 @@ class SetupController extends AbstractController
     /**
      * Perform initial DB setup.
      *
-     * @param Request  $request
-     * @param Response $response
+     * @param Request           $request
+     * @param ResponseInterface $response
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    public function setupDbAction(Request $request, Response $response)
+    public function setupDbAction(Request $request, ResponseInterface $response)
     {
         $this->api->setupDB();
 
-        return $response->withRedirect("http://".$this->host."/install/", 301);
+        return $this->redirect($response, "http://".$this->host."/install/", 301);
     }
 
     /**
      * Update library data.
      *
-     * @param Request  $request
-     * @param Response $response
-     * @param string   $type
+     * @param Request           $request
+     * @param ResponseInterface $response
+     * @param string            $type
      */
-    public function updateLibraryAction(Request $request, Response $response, $type)
+    public function updateLibraryAction(Request $request, ResponseInterface $response, $type)
     {
         try {
             if ($type === 'movies') {
