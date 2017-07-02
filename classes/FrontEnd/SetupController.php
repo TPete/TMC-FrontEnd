@@ -2,6 +2,7 @@
 
 namespace TinyMediaCenter\FrontEnd;
 
+use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -16,7 +17,7 @@ class SetupController extends AbstractController
      * @param Request  $request
      * @param Response $response
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function indexAction(Request $request, Response $response)
     {
@@ -54,7 +55,7 @@ class SetupController extends AbstractController
      * @param Request  $request
      * @param Response $response
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function updateAction(Request $request, Response $response)
     {
@@ -143,7 +144,7 @@ class SetupController extends AbstractController
      * @param Request  $request
      * @param Response $response
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function setupDbAction(Request $request, Response $response)
     {

@@ -2,6 +2,7 @@
 
 namespace TinyMediaCenter\FrontEnd;
 
+use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -17,7 +18,7 @@ class MovieController extends AbstractController
      * @param Response $response
      * @param string   $category
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function movieAction(Request $request, Response $response, $category)
     {
@@ -83,7 +84,7 @@ class MovieController extends AbstractController
      * @param string   $category
      * @param int      $id
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function lookupAction(Request $request, Response $response, $category, $id)
     {

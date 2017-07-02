@@ -2,6 +2,7 @@
 
 namespace TinyMediaCenter\FrontEnd;
 
+use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -16,7 +17,7 @@ class ShowController extends AbstractController
      * @param string   $category
      * @param string   $id
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function updateShowAction(Request $request, Response $response, $category, $id)
     {
@@ -37,7 +38,7 @@ class ShowController extends AbstractController
      * @param string   $category
      * @param string   $id
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function getEpisodeDescriptionAction(Request $request, Response $response, $category, $id)
     {
@@ -60,7 +61,7 @@ class ShowController extends AbstractController
      * @param Response $response
      * @param string   $category
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function indexAction(Request $request, Response $response, $category)
     {
@@ -92,7 +93,7 @@ class ShowController extends AbstractController
      * @param string   $category
      * @param int      $id
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function detailsAction(Request $request, Response $response, $category, $id)
     {
