@@ -2,7 +2,6 @@
 
 namespace TinyMediaCenter\FrontEnd;
 
-use Psr\Http\Message\ResponseInterface;
 use Slim\Container;
 use Slim\Http\Response;
 
@@ -64,14 +63,14 @@ class Util
     }
 
     /**
-     * @param RemoteException   $exp
-     * @param string            $host
-     * @param Container         $container
-     * @param ResponseInterface $response
+     * @param RemoteException $exp
+     * @param string          $host
+     * @param Container       $container
+     * @param Response        $response
      *
      * @return Response
      */
-    public static function renderException(RemoteException $exp, $host, Container $container, ResponseInterface $response)
+    public static function renderException(RemoteException $exp, $host, Container $container, Response $response)
     {
         return $container->view->render(
             $response,

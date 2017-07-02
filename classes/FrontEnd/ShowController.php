@@ -2,8 +2,8 @@
 
 namespace TinyMediaCenter\FrontEnd;
 
-use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
+use Slim\Http\Response;
 
 /**
  * Class ShowController
@@ -11,35 +11,35 @@ use Slim\Http\Request;
 class ShowController extends AbstractController
 {
     /**
-     * @param Request           $request
-     * @param ResponseInterface $response
-     * @param string            $category
-     * @param string            $id
+     * @param Request  $request
+     * @param Response $response
+     * @param string   $category
+     * @param string   $id
      *
-     * @return ResponseInterface
+     * @return Response
      */
-    public function updateShowAction(Request $request, ResponseInterface $response, $category, $id)
+    public function updateShowAction(Request $request, Response $response, $category, $id)
     {
         try {
             $this->api->updateShowDetails($category, $id, $_POST["title"], $_POST["tvdbId"], $_POST["lang"]);
 
             $url = "http://".$this->host.'/shows/'.$category.'/'.$id;
 
-            return $this->redirect($response, $url, 302);
+            return $response->withRedirect($url, 302);
         } catch (RemoteException $exp) {
             return Util::renderException($exp, $this->host, $this->container, $response);
         }
     }
 
     /**
-     * @param Request           $request
-     * @param ResponseInterface $response
-     * @param string            $category
-     * @param string            $id
+     * @param Request  $request
+     * @param Response $response
+     * @param string   $category
+     * @param string   $id
      *
-     * @return ResponseInterface
+     * @return Response
      */
-    public function getEpisodeDescriptionAction(Request $request, ResponseInterface $response, $category, $id)
+    public function getEpisodeDescriptionAction(Request $request, Response $response, $category, $id)
     {
         try {
             $data = $this->api->getEpisodeDescription($category, $id);
@@ -56,17 +56,17 @@ class ShowController extends AbstractController
     }
 
     /**
-     * @param Request           $request
-     * @param ResponseInterface $response
-     * @param string            $category
+     * @param Request  $request
+     * @param Response $response
+     * @param string   $category
      *
-     * @return ResponseInterface
+     * @return Response
      */
-    public function indexAction(Request $request, ResponseInterface $response, $category)
+    public function indexAction(Request $request, Response $response, $category)
     {
         try {
-            $data = $this->api->getCategoryOverview($category);
-            $title = ucfirst($category);
+            $data   = $this->api->getCategoryOverview($category);
+            $title  = ucfirst($category);
             $target = $this->host;
 
             return $this->twig->render(
@@ -87,18 +87,18 @@ class ShowController extends AbstractController
     }
 
     /**
-     * @param Request           $request
-     * @param ResponseInterface $response
-     * @param string            $category
-     * @param int               $id
+     * @param Request  $request
+     * @param Response $response
+     * @param string   $category
+     * @param int      $id
      *
-     * @return ResponseInterface
+     * @return Response
      */
-    public function detailsAction(Request $request, ResponseInterface $response, $category, $id)
+    public function detailsAction(Request $request, Response $response, $category, $id)
     {
         try {
-            $data = $this->api->getShowDetails($category, $id);
-            $title = $data["title"];
+            $data   = $this->api->getShowDetails($category, $id);
+            $title  = $data["title"];
             $target = $this->host."/shows/".$category."/";
 
             return $this->twig->render(

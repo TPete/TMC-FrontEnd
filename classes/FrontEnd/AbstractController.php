@@ -2,9 +2,7 @@
 
 namespace TinyMediaCenter\FrontEnd;
 
-use Psr\Http\Message\ResponseInterface;
 use Slim\Container;
-use Slim\Http\Response;
 use Slim\Views\Twig;
 
 /**
@@ -43,23 +41,5 @@ abstract class AbstractController
     protected function getNavigationCategories()
     {
         return $this->container['categories'];
-    }
-
-    /**
-     * @param ResponseInterface $response
-     * @param string            $uri
-     * @param int|null          $status
-     *
-     * @throws \Exception
-     *
-     * @return Response
-     */
-    protected function redirect(ResponseInterface $response, $uri, $status)
-    {
-        if ($response instanceof Response) {
-            return $response->withRedirect($uri, $status);
-        }
-
-        throw new \Exception('Redirect Failed');
     }
 }
