@@ -14,6 +14,10 @@
         'lists': lists,
         'collections': collections
     } only %}
+    {% include "movies/editDialog.html.twig" with {
+    'lists': lists,
+    'collections': collections
+    } only %}
 {% endblock %}
 
 {% block header_bar %}
@@ -25,7 +29,7 @@
         data-category="{{ category }}" data-sort="{{ sort }}" data-filter="{{ filter }}"
         data-genres="{{ genres }}" data-collection="{{ collection }}" data-list="{{ list }}">
         {% include "movies/movieWrapper.html.twig" with {
-            'movies': movies
+            'movies': movies,
         } only %}
     </div>
 {% endblock %}

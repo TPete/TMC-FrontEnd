@@ -72,12 +72,80 @@ var Movies = (function() {
             });
     }
 
+    function addEditMovieHandler()
+    {
+        var baseUrl = '/movies/',
+            url = 'http://' + host + baseUrl + get('category'),
+            id,
+            filename;
+
+        $('#movie-edit-box')
+            .on('show.bs.modal', function (e) {
+                var a = e.relatedTarget;
+
+                id = $(a).data('id');
+                filename = $(a).data('filename');
+                filename = filename.substr(filename.lastIndexOf('/') + 1);
+
+                $('#movie-edit-box').find('button[type=submit]').prop('disabled', true);
+                $('#movieDbId').val(null);
+            })
+            .on('change', '#movieDbId', function () {
+                if ($(this).val().length > 0) {
+                    $.ajax(
+                        url + '/lookup/?movieDbId=' + $(this).val(),
+                        {
+                            type: 'get',
+                            success: function (response) {
+                                if (response.status === 'Ok') {
+                                    $('#previewTitle').html(response.data.title);
+                                    $('#previewOverview').html(response.data.overview);
+
+                                    $('#preview').show();
+
+                                    $('#movie-edit-box').find('button[type=submit]').prop('disabled', false);
+                                }
+                            },
+                            error: function (error) {
+                                alert(error);
+                                lock = false;
+                            }
+                        }
+                    )
+                }
+            })
+            .on('click', 'button[type=submit]', function () {
+                $.ajax(
+                    url + '/'+ id +'/',
+                    {
+                        type: 'post',
+                        data: {
+                            'movieDbId': $('#movieDbId').val(),
+                            'filename': filename
+                        },
+                        success: function (response) {
+                            if (response.status === 'Ok') {
+                                window.location.reload();
+                            } else {
+                                alert(response.error);
+                            }
+                        },
+                        error: function (error) {
+                            alert(error);
+                            lock = false;
+                        }
+                    }
+                )
+            });
+    }
+
     function setup()
     {
         host = $('#host').val();
         container = $('#nm-movie-details-wrapper');
         fetchSize = container.data('fetch-size');
         addInfiniteScrollingHandler();
+        addEditMovieHandler();
     }
 
     return {

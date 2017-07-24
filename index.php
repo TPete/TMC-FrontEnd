@@ -126,15 +126,15 @@ $app
     ->group(
         '/movies/{category}',
         function () {
-            $this->get('/', '\TinyMediaCenter\FrontEnd\MovieController:movieAction');
-
-            $this->get('/lookup/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:lookupAction');
+            $this->get('/lookup/', '\TinyMediaCenter\FrontEnd\MovieController:lookupAction');
 
             $this->get('/genres/', '\TinyMediaCenter\FrontEnd\MovieController:genresAction');
 
+            $this->get('/', '\TinyMediaCenter\FrontEnd\MovieController:movieAction');
+
             $this->get('/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:editAction');
 
-            $this->post('/{dbid}/', '\TinyMediaCenter\FrontEnd\MovieController:updateMovieAction');
+            $this->post('/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:updateMovieAction');
         }
     )
 ->add($checkAPI());

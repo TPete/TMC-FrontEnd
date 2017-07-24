@@ -82,27 +82,24 @@ class MovieController extends AbstractController
      * @param Request  $request
      * @param Response $response
      * @param string   $category
-     * @param int      $id
      *
      * @return ResponseInterface
      */
-    public function lookupAction(Request $request, Response $response, $category, $id)
+    public function lookupAction(Request $request, Response $response, $category)
     {
         try {
-            $movie = $this->api->lookupMovie($_GET["movieDBID"]);
+            $movie = $this->api->lookupMovie($_GET["movieDbId"]);
+
+            $json = [
+                'status' => 'Ok',
+                'data' => [],
+            ];
 
             if ($movie !== null) {
-                return $this->twig->render(
-                    $response,
-                    "movies/movieDetailsDialog.html.twig",
-                    [
-                        "data"        => $movie,
-                        "movie_db_id" => $_GET["movieDBID"],
-                    ]
-                );
-            } else {
-                echo "No Match";
+                $json['data'] = $movie;
             }
+
+            return $response->withJson($json);
         } catch (RemoteException $exp) {
             return Util::renderException($exp, $this->host, $this->container, $response);
         }
@@ -163,13 +160,16 @@ class MovieController extends AbstractController
      * @param Request  $request
      * @param Response $response
      * @param string   $category
-     * @param int      $dbid
+     * @param int      $id
+     *
+     * @return ResponseInterface
      */
-    public function updateMovieAction(Request $request, Response $response, $category, $dbid)
+    public function updateMovieAction(Request $request, Response $response, $category, $id)
     {
         try {
-            echo $this->api->updateMovie($category, $dbid, $_POST["movieDBID"], $_POST["filename"]);
-            echo "OK";
+            $json = $this->api->updateMovie($category, $id, $_POST["movieDbId"], $_POST["filename"]);
+
+            return $response->withJson($json);
         } catch (RemoteException $exp) {
             Util::renderException($exp, $this->host, $this->container, $response);
         }

@@ -225,17 +225,17 @@ class RestApi
 
     /**
      * @param string $category
-     * @param int    $dbID
-     * @param string $movieDBID
+     * @param int    $dbId
+     * @param string $movieDbId
      * @param string $filename
      *
      * @return mixed
      */
-    public function updateMovie($category, $dbID, $movieDBID, $filename)
+    public function updateMovie($category, $dbId, $movieDbId, $filename)
     {
-        $url = "/movies/".$category."/".$dbID."/";
+        $url = "/movies/".$category."/".$dbId."/";
         $args = [
-            "movieDBID" => $movieDBID,
+            "movieDbId" => $movieDbId,
             "filename"  => $filename,
         ];
 

@@ -1,5 +1,7 @@
 {% for movie in movies %}
     {% include "movies/movieCard.html.twig" with {
+        'id': movie['id'],
+        'movie_db_id': movie['movie_db_id'],
         'poster': movie['poster'],
         'title': movie['title'],
         'overview': movie['overview'],
@@ -12,6 +14,6 @@
         'info': movie['info'],
         'filename': movie['filename'],
         'collection_id': movie['collection_id'],
-        'collection_name': movie['collection_name'],
+        'collection_name': movie['collection_name']
     } %}
 {% endfor %}
