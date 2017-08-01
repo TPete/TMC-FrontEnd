@@ -18,6 +18,19 @@ body {
     padding-top: 1em
 }
 
+.show-card-title {
+    font-size: 1.8em;
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin: -0.25em;
+}
+
+.show-card-title:focus, .show-card-title:hover {
+    text-decoration: none;
+}
+
 .episodes-wrapper {
     background-attachment: fixed;
     background-position: 0 3.3em;
