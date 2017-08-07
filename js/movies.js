@@ -4,10 +4,19 @@ var Movies = (function() {
         lock = false,
         container,
         page = 1,
-        fetchSize;
+        fetchSize,
+        instantSearchXhr,
+        timer,
+        delay = 500;
 
-    function get(option){
+    function get(option)
+    {
         return container.data(option);
+    }
+
+    function set(option, value)
+    {
+        container.data(option, value);
     }
 
     function getSearchOptions()
@@ -26,13 +35,24 @@ var Movies = (function() {
         return result.join('&');
     }
 
-    function fetchMovies()
+    function getUrl(withOptions)
     {
         var baseUrl = '/movies/',
-            url,
+            url = 'http://' + host + baseUrl + get('category');
+
+        if (withOptions) {
+            url = '/?' + getSearchOptions();
+        }
+
+        return url;
+    }
+
+    function fetchMovies()
+    {
+        var url,
             offset;
 
-        url = 'http://' + host + baseUrl + get('category') + '?' + getSearchOptions();
+        url = getUrl(true);
         offset = page * fetchSize;
         page++;
         console.log('Fetching');
@@ -74,8 +94,7 @@ var Movies = (function() {
 
     function addEditMovieHandler()
     {
-        var baseUrl = '/movies/',
-            url = 'http://' + host + baseUrl + get('category'),
+        var url = getUrl(false),
             id,
             filename;
 
@@ -139,6 +158,48 @@ var Movies = (function() {
             });
     }
 
+    function addInstantSearchHandler()
+    {
+        $('#instant-search')
+            .on('input', function () {
+                var url,
+                    filter = encodeURIComponent($(this).val());
+
+                set('filter', filter);
+                url = getUrl(true);
+                window.history.pushState({}, '', url);
+
+                if (instantSearchXhr) {
+                    instantSearchXhr.abort();
+                }
+
+                clearTimeout(timer);
+
+                timer = setTimeout(function() {
+                    page = 1;
+                    window.scrollTo(0, 0);
+                    instantSearchXhr = $.ajax(
+                        url,
+                        {
+                            type: 'get',
+                            success: function (data) {
+                                if (data.length > 0) {
+                                    container.html(data);
+                                } else {
+                                    console.log('empty');
+                                }
+                            },
+                            error: function (error) {
+                                if (error.statusText !== 'abort') {
+                                    alert(error.statusText);
+                                }
+                            }
+                        }
+                    );
+                }, delay);
+            });
+    }
+
     function setup()
     {
         host = $('#host').val();
@@ -146,6 +207,7 @@ var Movies = (function() {
         fetchSize = container.data('fetch-size');
         addInfiniteScrollingHandler();
         addEditMovieHandler();
+        addInstantSearchHandler();
     }
 
     return {
