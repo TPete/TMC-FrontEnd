@@ -41,7 +41,7 @@ var Movies = (function() {
             url = 'http://' + host + baseUrl + get('category');
 
         if (withOptions) {
-            url = '/?' + getSearchOptions();
+            url += '/?' + getSearchOptions();
         }
 
         return url;
