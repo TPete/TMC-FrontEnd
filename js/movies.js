@@ -158,12 +158,26 @@ var Movies = (function() {
             });
     }
 
+    function displayLoading()
+    {
+        if (container.find('.faded').length === 0) {
+            container.prepend('<div class="faded"></div>');
+        }
+    }
+
+    function displayEmpty()
+    {
+        container.html('<div class="empty-result text-center"><i class="fa fa-frown-o fa-4x"></i><h3>Leider nichts gefunden</h3></div>');
+    }
+
     function addInstantSearchHandler()
     {
         $('#instant-search')
             .on('input', function () {
                 var url,
                     filter = encodeURIComponent($(this).val());
+
+                displayLoading();
 
                 set('filter', filter);
                 url = getUrl(true);
@@ -186,7 +200,7 @@ var Movies = (function() {
                                 if (data.length > 0) {
                                     container.html(data);
                                 } else {
-                                    console.log('empty');
+                                    displayEmpty();
                                 }
                             },
                             error: function (error) {

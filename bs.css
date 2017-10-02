@@ -207,3 +207,19 @@ a.link-secondary:HOVER {
 .mb {
     margin-bottom: 15px;
 }
+
+.faded {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(50, 50, 50, 0.6);
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.empty-result {
+    width: 30%;
+    margin: 100px auto;
+    text-align: center;
+}
