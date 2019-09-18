@@ -4,20 +4,22 @@
     {{ title }}
 {% endblock %}
 
-{% block javascript %}
+{% block js %}
     {{ parent() }}
-    <script type="text/javascript" src='http://{{ host }}/js/movies.js?ver=1'></script>
+    <script type="text/javascript" src='http://{{ host }}/resources/public/js/movies.js?ver=1'></script>
 {% endblock %}
 
 {% block dialogs %}
     {% include "movies/searchDialog.html.twig" with {
-        'lists': lists,
-        'collections': collections
+        'filter': filter,
+        'list': list,
+        'listOptions': listOptions,
+        'collection': collection,
+        'collectionOptions': collectionOptions,
+        'genre': genre,
+        'genreOptions': genreOptions
     } only %}
-    {% include "movies/editDialog.html.twig" with {
-    'lists': lists,
-    'collections': collections
-    } only %}
+    {% include "movies/editDialog.html.twig" %}
 {% endblock %}
 
 {% block header_bar %}
@@ -27,7 +29,7 @@
 {% block content %}
     <div id="nm-movie-details-wrapper" data-fetch-size="{{ fetchSize }}"
         data-category="{{ category }}" data-sort="{{ sort }}" data-filter="{{ filter }}"
-        data-genres="{{ genres }}" data-collection="{{ collection }}" data-list="{{ list }}">
+        data-genre="{{ genre }}" data-collection="{{ collection }}" data-list="{{ list }}">
         {% include "movies/movieWrapper.html.twig" with {
             'movies': movies,
         } only %}

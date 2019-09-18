@@ -8,14 +8,14 @@
     {% set class1 = (filter is empty and genres is empty and collection == 0 and list == 0 and sort == "date_desc") ? " active" : ""  %}
     {% set class2 = (filter is empty and genres is empty and collection == 0 and list == 0 and sort == "name_asc") ? " active" : "" %}
 
-    <form class="form-inline float-xs-left mr-2">
-        <input id="instant-search" class="form-control" placeholder="Suche">
+    <form class="form-inline">
+        <input id="instant-search" class="form-control mr-2" placeholder="Suche">
+        <div class="btn-group">
+            <a class="btn btn-light{{ class1 }}" href="?sort=date_desc">Datum</a>
+            <a class="btn btn-light{{ class2 }}" href="?sort=name_asc">Name</a>
+            <button type="button" class="btn btn-light" data-toggle="modal" data-target="#movie-search-box">
+                Suche
+            </button>
+        </div>
     </form>
-    <div class="btn-group">
-        <a class="btn btn-secondary{{ class1 }}" href="?sort=date_desc">Datum</a>
-        <a class="btn btn-secondary{{ class2 }}" href="?sort=name_asc">Name</a>
-        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#movie-search-box">
-            Suche
-        </button>
-    </div>
 {% endblock %}

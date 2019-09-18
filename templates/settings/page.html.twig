@@ -4,6 +4,11 @@
     {{ title }}
 {% endblock %}
 
+{% block js %}
+    {{ parent() }}
+    <script type="text/javascript" src='http://{{ host }}/resources/public/js/settings.js?ver=1'></script>
+{% endblock %}
+
 {% block header_bar %}
     {% include "main/headerBar/default.html.twig" %}
 {% endblock %}

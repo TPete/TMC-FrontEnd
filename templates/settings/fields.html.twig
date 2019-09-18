@@ -1,35 +1,43 @@
 <form method="post" action="">
-    <fieldset>
-        <legend>Frontend</legend>
-        {% for name, value in config %}
-            <div class="form-group row">
-                <label class="col-sm-2 col-form-label">
-                    {{ name }}
-                </label>
-                <div class="col-sm-10 col-md-6">
-                    <input class="form-control" type="text" name="{{ name }}" id="{{ name }}" value="{{ value }}" required="required">
-                </div>
-            </div>
-        {% endfor %}
-    </fieldset>
+    <div class="row pt-3">
+        <div class="col">
+            <h1>Frontend</h1>
+               {% for name, value in config %}
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="{{ name }}">
+                            {{ name }}
+                        </label>
+                        <div class="col-sm-10 col-md-6">
+                            <input class="form-control" type="text" name="{{ name }}" id="{{ name }}" value="{{ value }}" required="required">
+                        </div>
+                    </div>
+                {% endfor %}
+        </div>
+    </div>
 
-    <fieldset>
-        <legend>API</legend>
-        {% if apiConfig|length == 0 %}
-            <p>
-                API-Konfiguration nicht gefunden. Bitte die Url zur API prüfen.
-            </p>
-        {% endif %}
-        {% for name, value in apiConfig %}
-            <div class="form-group row">
-                <label class="col-sm-2 col-form-label">
-                    {{ name }}
-                </label>
-                <div class="col-sm-10 col-md-6">
-                    <input class="form-control" type="text" name="{{ name }}" id="{{ name }}" value="{{ value }}" required="required">
-                </div>
-            </div>
-        {% endfor %}
-    </fieldset>
-    <button class="btn btn-primary" type="submit">Speichern</button>
+    <div class="row mb-5">
+        <div class="col">
+            <h1>API</h1>
+            {% if apiConfig|length == 0 %}
+                <p>
+                    API-Konfiguration nicht gefunden. Bitte die Url zur API prüfen.
+                </p>
+            {% endif %}
+            {% for groupName, group in apiConfig %}
+                <h2>{{ groupName }}</h2>
+                    {% for name, value in group %}
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">
+                                {{ name }}
+                            </label>
+                            <div class="col-sm-10 col-md-6">
+                                <input class="form-control" type="text" name="{{ name }}" id="{{ name }}" value="{{ value }}" required="required">
+                            </div>
+                        </div>
+                    {% endfor %}
+            {% endfor %}
+
+            <button class="btn btn-primary" type="submit">Speichern</button>
+        </div>
+    </div>
 </form>

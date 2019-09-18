@@ -21,32 +21,35 @@ class SetupController extends AbstractController
      */
     public function indexAction(Request $request, Response $response)
     {
-        $file     = "config.json";
-        $knowsAPI = file_exists($file);
+        try {
+            $file = 'config.json';
+            $knowsAPI = file_exists($file);
 
-        if (false === $knowsAPI) {
-            $file = "example_config.json";
+            if (false === $knowsAPI) {
+                $file = 'example_config.json';
+            }
+
+            $config = Util::readJSONFile($file);
+            $apiConfig = [];
+
+            if ($knowsAPI && $this->api->isValid()) {
+                $apiConfig = $this->api->getConfig();
+            }
+
+            return $this->twig->render(
+                $response,
+                'settings/page.html.twig',
+                [
+                    'host'       => $this->host,
+                    'title'      => 'Einstellungen',
+                    'config'     => $config,
+                    'apiConfig'  => $apiConfig,
+                    'categories' => $this->getNavigationCategories(),
+                ]
+            );
+        } catch (RemoteException $e) {
+            return Util::renderException($e, $this->host, $this->container, $response);
         }
-
-        $config = Util::readJSONFile($file);
-        $apiConfig = [];
-
-        if ($knowsAPI && $this->api->isValid()) {
-            $apiConfig = $this->api->getConfig();
-        }
-
-        return $this->twig->render(
-            $response,
-            "settings/page.html.twig",
-            [
-                'host'       => $this->host,
-                'title'      => 'Einstellungen',
-                'target'     => $this->host,
-                'config'     => $config,
-                'apiConfig'  => $apiConfig,
-                'categories' => $this->getNavigationCategories(),
-            ]
-        );
     }
 
     /**
@@ -59,82 +62,86 @@ class SetupController extends AbstractController
      */
     public function updateAction(Request $request, Response $response)
     {
-        $config = ["restUrl" => $_POST["restUrl"]];
-        Util::writeJSONFile("config.json", $config);
+        try {
+            $config = ['restUrl' => $_POST['restUrl']];
+            Util::writeJSONFile('config.json', $config);
 
-        if (isset($_POST["pathMovies"])) {
-            $config = [
-                "pathMovies"  => $_POST["pathMovies"],
-                "aliasMovies" => $_POST["aliasMovies"],
-                "pathShows"   => $_POST["pathShows"],
-                "aliasShows"  => $_POST["aliasShows"],
-                "dbHost"      => $_POST["dbHost"],
-                "dbName"      => $_POST["dbName"],
-                "dbUser"      => $_POST["dbUser"],
-                "dbPassword"  => $_POST["dbPassword"],
-                "TMDBApiKey"  => $_POST["TMDBApiKey"],
-                "TTVDBApiKey" => $_POST["TTVDBApiKey"],
-            ];
+            if (isset($_POST['pathMovies'])) {
+                $config = [
+                    'pathMovies'  => $_POST['pathMovies'],
+                    'aliasMovies' => $_POST['aliasMovies'],
+                    'pathShows'   => $_POST['pathShows'],
+                    'aliasShows'  => $_POST['aliasShows'],
+                    'dbHost'      => $_POST['dbHost'],
+                    'dbName'      => $_POST['dbName'],
+                    'dbUser'      => $_POST['dbUser'],
+                    'dbPassword'  => $_POST['dbPassword'],
+                    'TMDBApiKey'  => $_POST['TMDBApiKey'],
+                    'TTVDBApiKey' => $_POST['TTVDBApiKey'],
+                ];
 
-            $this->api->updateConfig($config);
+                $this->api->updateConfig($config);
+            }
+
+            $uri = 'http://'.$this->host.'/install/';
+
+            return $response->withRedirect($uri);
+        } catch (RemoteException $e) {
+            return Util::renderException($e, $this->host, $this->container, $response);
         }
-
-        $uri = 'http://'.$this->host.'/install/';
-
-        return $response->withRedirect($uri, 301);
     }
 
     /**
      * @param Request  $request
      * @param Response $response
      * @param string   $type
+     *
+     * @return ResponseInterface
      */
     public function checkAction(Request $request, Response $response, $type)
     {
-        $types = [
-            'restUrl',
-            'db',
-            'movies',
-            'shows',
-        ];
-        if (in_array($type, $types)) {
-            $api = new RestAPI($_GET["restUrl"]);
-            array_shift($types);
+        try {
+            $types = ['restUrl', 'db', 'movies', 'shows'];
+            $res = [];
 
-            if ($type === 'restUrl') {
-                $res['result'] = $api->isValid() ? "Ok" : "Error";
+            if (in_array($type, $types)) {
+                $api = new RestAPI($request->getQueryParam('restUrl'));
 
-                echo json_encode($res);
-            } elseif (in_array($type, $types)) {
-                $args = [];
-                if ($type === "db") {
-                    $args = [
-                        "host"     => $_GET["dbHost"],
-                        "name"     => $_GET["dbName"],
-                        "user"     => $_GET["dbUser"],
-                        "password" => $_GET["dbPassword"],
-                    ];
-                }
-                if ($type === "movies") {
-                    $args = [
-                        "pathMovies"  => $_GET["pathMovies"],
-                        "aliasMovies" => $_GET["aliasMovies"],
-                    ];
-                }
-                if ($type === "shows") {
-                    $args = [
-                        "pathShows"  => $_GET["pathShows"],
-                        "aliasShows" => $_GET["aliasShows"],
-                    ];
-                }
-
-                if ($api->isValid()) {
-                    $res = $api->check($type, $args);
+                if ($type === 'restUrl') {
+                    $res['result'] = $api->isValid() ? 'Ok' : 'Error';
                 } else {
-                    $res['result'] = 'Error';
+                    if ('db' === $type) {
+                        $args = [
+                            'host'     => $request->getQueryParam('dbHost'),
+                            'name'     => $request->getQueryParam('dbName'),
+                            'user'     => $request->getQueryParam('dbUser'),
+                            'password' => $request->getQueryParam('dbPassword'),
+                        ];
+                    } elseif ('movies' === $type) {
+                        $args = [
+                            'pathMovies'  => $request->getQueryParam('pathMovies'),
+                            'aliasMovies' => $request->getQueryParam('aliasMovies'),
+                        ];
+                    } else {
+                        $args = [
+                            'pathShows'  => $request->getQueryParam('pathShows'),
+                            'aliasShows' => $request->getQueryParam('aliasShows'),
+                        ];
+                    }
+
+                    if ($api->isValid()) {
+                        $res = $api->check($type, $args);
+                    } else {
+                        $res['result'] = 'Error';
+                    }
                 }
-                echo json_encode($res);
+            } else {
+                $res['result'] = 'Error';
             }
+
+            return $response->withJson($res);
+        } catch (RemoteException $e) {
+            return Util::renderException($e, $this->host, $this->container, $response);
         }
     }
 
@@ -148,9 +155,13 @@ class SetupController extends AbstractController
      */
     public function setupDbAction(Request $request, Response $response)
     {
-        $this->api->setupDB();
+        try {
+            $this->api->setupDB();
 
-        return $response->withRedirect("http://".$this->host."/install/", 301);
+            return $response->withRedirect('http://'.$this->host.'/install/');
+        } catch (RemoteException $e) {
+            return Util::renderException($e, $this->host, $this->container, $response);
+        }
     }
 
     /**

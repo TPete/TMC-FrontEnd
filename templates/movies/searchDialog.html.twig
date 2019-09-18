@@ -2,10 +2,10 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Suchen</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="myModalLabel">Suchen</h4>
             </div>
             <form method="get" action="">
                 <div class="modal-body">
@@ -13,13 +13,18 @@
                         <div class="form-group row">
                             <label class="col-sm-3 col-form-label" for="filter">Suche</label>
                             <div class="col-sm-9">
-                                <input class="form-control" type="text" name="filter" id="filter" placeholder="Titel, Darsteller, Regie, ...">
+                                <input class="form-control" type="text" name="filter" id="filter" value="{{ filter }}" placeholder="Titel, Darsteller, Regie, ...">
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-3 col-form-label" for="genres">Genres</label>
+                            <label class="col-sm-3 col-form-label" for="genre">Genres</label>
                             <div class="col-sm-9">
-                                <input class="form-control" type="text" name="genres" id="genres">
+                                <select class="form-control" name="genre" id="genre">
+                                    <option value=""></option>
+                                    {% for option in genreOptions %}
+                                        <option value="{{ option }}" {% if option == genre %}selected="selected"{% endif %}>{{ option }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -27,8 +32,8 @@
                             <div class="col-sm-9">
                                 <select class="form-control" name="list" id="list">
                                     <option value=""></option>
-                                    {% for row in lists %}
-                                        <option value="{{ row["id"] }}">{{ row["name"] }}</option>
+                                    {% for row in listOptions %}
+                                        <option value="{{ row["id"] }}" {% if row['id'] == list %}selected="selected"{% endif %}>{{ row["name"] }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -38,8 +43,8 @@
                             <div class="col-sm-9">
                                 <select class="form-control" name="collection" id="collection">
                                     <option value=""></option>
-                                    {% for row in collections %}
-                                        <option value="{{ row["id"] }}">{{ row["name"] }}</option>
+                                    {% for row in collectionOptions %}
+                                        <option value="{{ row["id"] }}" {% if row['id'] == collection %}selected="selected"{% endif %}>{{ row["name"] }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

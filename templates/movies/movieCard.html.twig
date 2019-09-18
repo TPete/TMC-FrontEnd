@@ -1,22 +1,20 @@
 <div class="row movie-row">
-    <div class="col-xs-12 col-sm-6 col-md-3">
-        <img src="{{ poster }}" class="img-fluid">
+    <div class="col-xs-12 col-sm-6 col-md-3 cursor-hand">
+        <img src="{{ poster }}" class="img-fluid" data-toggle="movie-poster"
+        data-url="{{ poster_big }}" data-id="{{ id }}">
     </div>
     <div class="col-xs-12 col-sm-6 col-md-9">
         <div class="movie-card">
-            <h1 class="movie-card-header hidden-xs-down">
+            <h1 class="movie-card-header">
                 {{ title }}
             </h1>
-            <h2 class="movie-card-header hidden-sm-up">
-                {{ title }}
-            </h2>
             <div class="movie-card-block">
                 <p class="movie-card-block-description">
                     {{ overview }}
                 </p>
                 {% if collection_name|length > 0 %}
                     <p>
-                        Teil der <a href="?collection={{ collection_id }}">{{ collection_name }}</a>
+                        <a href="?collection={{ collection_id }}" class="btn btn-outline-info" title="Nach Filmen der {{ collection_name }} suchen" data-toggle="tooltip">{{ collection_name }}</a>
                     </p>
                 {% endif %}
                 {#{% for list in lists %}#}
@@ -24,46 +22,41 @@
                         {#Teil der <a href="?list={{ list["list_id"] }}">{{ list["list_name"] }}</a> Liste#}
                     {#</p>#}
                 {#{% endfor %}#}
-                <div class="row">
-                    <div class="col-md-2 col-xs-4 float-xs-right">
-                        <a href="{{ filename }}" type="button" class="btn btn-primary btn-block mb">
-                            <i class="fa fa-play"></i>
-                        </a>
-                    </div>
-                </div>
             </div>
             <div class="movie-card-footer">
                 <div class="row">
                     <div class="col-md-6">
-                        <dl class="row">
-                            <dt class="col-md-4">Jahr/Land</dt>
-                            <dd class="col-md-8">{{ year~" / "~countries }}</dd>
-                            <dt class="col-md-4">Genres</dt>
-                            <dd class="col-md-8">
-                                {% for genre in genres %}
-                                    <a href="?genres={{ genre }}" class="btn btn-outline-info">{{ genre }}</a>
+                        <dl class="row mb-0">
+                            <dt class="col-md-3">Darsteller</dt>
+                            <dd class="col-md-9">
+                                {% for actor in actors %}
+                                    <a href="?filter={{ actor }}" class="btn btn-outline-info" title="Nach {{ actor|raw }} suchen" data-toggle="tooltip">{{ actor|raw }}</a>
                                 {% endfor %}
                             </dd>
-                            <dt class="col-md-4">Darsteller</dt>
-                            <dd class="col-md-8">
-                                {% for actor in actors %}
-                                    <a href="?filter={{ actor }}" class="btn btn-outline-info">{{ actor|raw }}</a>
+                            <dt class="col-md-3">Regie</dt>
+                            <dd class="col-md-9">
+                                <a href="?filter={{ director|url_encode }}" class="btn btn-outline-info" title="Nach {{ director }} suchen" data-toggle="tooltip">{{ director }}</a>
+                            </dd>
+                            <dt class="col-md-3">Genres</dt>
+                            <dd class="col-md-9">
+                                {% for genre in genres %}
+                                    <a href="?genres={{ genre }}" class="btn btn-outline-info" title="Nach {{ genre }} suchen" data-toggle="tooltip">{{ genre }}</a>
                                 {% endfor %}
                             </dd>
                         </dl>
                     </div>
                     <div class="col-md-6">
-                        <dl class="row">
-                            <dt class="col-md-3">Regie</dt>
-                            <dd class="col-md-9">
-                                <a href="?filter={{ director|url_encode }}" class="btn btn-outline-info">{{ director }}</a>
-                            </dd>
-                            <dt class="col-md-3">Info</dt>
-                            <dd class="col-md-9">{{ info|raw }}</dd>
+                        <dl class="row mb-0">
+                            <dt class="col-md-4 text-nowrap">Jahr / Land / Info</dt>
+                            <dd class="col-md-8">{{ '%s / %s / %s'|format(year, countries, info)|raw }}</dd>
                         </dl>
-                        <button class="btn btn-secondary" data-toggle="modal" data-target="#movie-edit-box" data-id="{{ id }}" data-filename="{{ filename }}">
+                        <a href="{{ filename }}" class="btn btn-primary w-25">
+                            <i class="fa fa-play"></i>
+                        </a>
+                        <a href="" class="btn btn-secondary w-25" data-toggle="modal" data-target="#movie-edit-box" data-id="{{ id }}" data-filename="{{ filename }}">
                             <i class="fa fa-pencil"></i>
-                        </button>
+                            Bearbeiten
+                        </a>
                     </div>
                 </div>
             </div>

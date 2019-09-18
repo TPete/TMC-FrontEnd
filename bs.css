@@ -14,7 +14,6 @@ body {
 }
 
 .show-list {
-    min-height: 100vh;
     padding-top: 1em
 }
 
@@ -222,4 +221,24 @@ a.link-secondary:HOVER {
     width: 30%;
     margin: 100px auto;
     text-align: center;
+}
+
+/*Fixes*/
+
+.bootbox .modal-header{
+    display: block;
+}
+
+/*Utilities*/
+
+.cursor-hand {
+    cursor: pointer;
+}
+
+.w-90 {
+    width: 90% !important;
+}
+
+.modal-lg {
+    max-width: 1400px !important;
 }

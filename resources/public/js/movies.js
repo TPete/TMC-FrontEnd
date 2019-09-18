@@ -1,4 +1,4 @@
-var Movies = (function() {
+var Movies = (function(bootbox) {
     "use strict";
     var host,
         lock = false,
@@ -22,7 +22,7 @@ var Movies = (function() {
     function getSearchOptions()
     {
         var result = [],
-            options = ['sort', 'filter', 'genres', 'collection', 'list'];
+            options = ['sort', 'filter', 'genre', 'collection', 'list'];
 
         options.forEach(function (option) {
             var val = get(option);
@@ -83,7 +83,11 @@ var Movies = (function() {
     {
         $(window)
             .on('scroll', function (e) {
-                var diff = container.height() - $(window).height() - e.originalEvent.pageY;
+                var diff = container.height() - $(window).height() - window.scrollY;
+                console.log(container.height());
+                console.log($(window).height());
+                console.log(e.originalEvent);
+
 
                 if (false === lock && diff < 0.3 * container.height()) {
                     lock = true;
@@ -214,6 +218,33 @@ var Movies = (function() {
             });
     }
 
+    function addMoviePosterHandler()
+    {
+        $('body')
+            .on('click', '[data-toggle="movie-poster"]', function() {
+                var url = getUrl();
+                $.ajax(
+                    url + '/' + $(this).data('id'),
+                    {
+                        type: 'get',
+                        success: function (data) {
+                            bootbox.dialog({
+                                message: data.template,
+                                buttons: {},
+                                onEscape: true,
+                                backdrop: true,
+                                size: 'large'
+                            });
+                            $('[data-toggle="tooltip"]').tooltip();
+                        },
+                        error: function (error) {
+                            alert(error.statusText);
+                        }
+                    }
+                )
+            })
+    }
+
     function setup()
     {
         host = $('#host').val();
@@ -222,12 +253,15 @@ var Movies = (function() {
         addInfiniteScrollingHandler();
         addEditMovieHandler();
         addInstantSearchHandler();
+        addMoviePosterHandler();
+
+        $('[data-toggle="tooltip"]').tooltip();
     }
 
     return {
         'setup': setup
     };
-}());
+}(bootbox));
 
 $(document).ready(function ()
 {

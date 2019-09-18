@@ -55,7 +55,7 @@ $app->add(function (Request $request, Response $response, callable $next) {
     if ($path != '/' && substr($path, -1) !== '/') {
         $uri = $uri->withPath($path.'/');
 
-        return $response->withRedirect((string) $uri, 301);
+        return $response->withRedirect((string) $uri);
     }
 
     return $next($request, $response);
@@ -65,7 +65,7 @@ $app->add(function (Request $request, Response $response, callable $next) {
 $checkAPI = function () use ($api, $host) {
     return function (Request $request, Response $response, $next) use ($api, $host) {
         if (false === $api->isValid()) {
-            return $response->withRedirect('http://'.$host.'/install/', 301);
+            return $response->withRedirect('http://'.$host.'/install/');
         }
 
         return $next($request, $response);
@@ -132,7 +132,7 @@ $app
 
             $this->get('/', '\TinyMediaCenter\FrontEnd\MovieController:movieAction');
 
-            $this->get('/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:editAction');
+            $this->get('/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:detailsAction');
 
             $this->post('/{id}/', '\TinyMediaCenter\FrontEnd\MovieController:updateMovieAction');
         }

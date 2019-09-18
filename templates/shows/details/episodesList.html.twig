@@ -1,6 +1,6 @@
 <div class="row episodes-wrapper" style='background-image: url("{{ imageUrl }}")'>
     {% if showData|length > 1 %}
-        <ul class="season-navigation">
+        <ul class="col-12 season-navigation position-fixed">
             {% for season in showData %}
                 <li>
                     <a href="#{{ season["title"] }}-link">{{ season["title"] }}</a>
@@ -8,7 +8,7 @@
             {% endfor %}
         </ul>
     {% endif %}
-    <ul id='season-list' class="col-md-5 col-sm-6">
+    <ul id='season-list' class="col-md-5 col-sm-6 {% if showData|length > 1 %}mt-5{% endif %}">
         {% for season in showData %}
         <li>
             <span class='season-title' id="{{ season["title"]  }}-link">
@@ -30,7 +30,7 @@
         </li>
         {% endfor %}
     </ul>
-    <div id="episode-details-wrapper" class="offset-md-5 col-md-7 offset-sm-6 col-sm-6 hidden-xs-down pos-f-t">
+    <div id="episode-details-wrapper" class="offset-md-5 col-md-7 offset-sm-6 col-sm-6 hidden-xs-down fixed-top">
         <div id="episode-details">
         </div>
     </div>

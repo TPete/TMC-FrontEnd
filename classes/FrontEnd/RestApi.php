@@ -19,6 +19,10 @@ class RestApi
      */
     public function __construct($baseUrl)
     {
+        if (substr($baseUrl, -1) === '/') {
+            $baseUrl = substr($baseUrl, 0, strlen($baseUrl) - 1);
+        }
+
         $this->baseUrl = $baseUrl;
     }
 
@@ -34,6 +38,8 @@ class RestApi
     }
 
     /**
+     * @throws RemoteException
+     *
      * @return mixed
      */
     public function getConfig()
@@ -45,7 +51,9 @@ class RestApi
     }
 
     /**
-     * @param string $config
+     * @param array $config
+     *
+     * @throws RemoteException
      *
      * @return mixed
      */
@@ -58,6 +66,8 @@ class RestApi
     }
 
     /**
+     * @throws RemoteException
+     *
      * @return mixed
      */
     public function getCategories()
@@ -70,7 +80,9 @@ class RestApi
 
     /**
      * @param string $type
-     * @param string $args
+     * @param array  $args
+     *
+     * @throws RemoteException
      *
      * @return mixed
      */
@@ -83,6 +95,8 @@ class RestApi
     }
 
     /**
+     * @throws RemoteException
+     *
      * @return mixed
      */
     public function setupDB()
@@ -95,6 +109,8 @@ class RestApi
 
     /**
      * @param string $category
+     *
+     * @throws RemoteException
      *
      * @return mixed
      */
@@ -110,6 +126,8 @@ class RestApi
      * @param string $category
      * @param int    $id
      *
+     * @throws RemoteException
+     *
      * @return mixed
      */
     public function getShowDetails($category, $id)
@@ -123,6 +141,8 @@ class RestApi
     /**
      * @param string $category
      * @param int    $id
+     *
+     * @throws RemoteException
      *
      * @return mixed
      */
@@ -141,6 +161,8 @@ class RestApi
      * @param string $tvdbId
      * @param string $lang
      *
+     * @throws RemoteException
+     *
      * @return mixed
      */
     public function updateShowDetails($category, $id, $title, $tvdbId, $lang)
@@ -157,6 +179,8 @@ class RestApi
     }
 
     /**
+     * @throws RemoteException
+     *
      * @return mixed
      */
     public function updateShows()
@@ -171,6 +195,8 @@ class RestApi
      * @param string $category
      * @param int    $id
      *
+     * @throws RemoteException
+     *
      * @return mixed
      */
     public function getMovie($category, $id)
@@ -183,6 +209,8 @@ class RestApi
 
     /**
      * @param int $id
+     *
+     * @throws RemoteException
      *
      * @return mixed
      */
@@ -203,6 +231,8 @@ class RestApi
      * @param string $genres
      * @param string $collection
      * @param string $list
+     *
+     * @throws RemoteException
      *
      * @return mixed
      */
@@ -229,6 +259,8 @@ class RestApi
      * @param string $movieDbId
      * @param string $filename
      *
+     * @throws RemoteException
+     *
      * @return mixed
      */
     public function updateMovie($category, $dbId, $movieDbId, $filename)
@@ -248,9 +280,11 @@ class RestApi
      * @param string $category
      * @param string $term
      *
+     * @throws RemoteException
+     *
      * @return mixed
      */
-    public function getGenres($category, $term)
+    public function getGenres($category, $term = '')
     {
         $url = "/movies/".$category."/genres/";
         $args = ["term" => $term];
@@ -263,6 +297,8 @@ class RestApi
     /**
      * @param string $category
      *
+     * @throws RemoteException
+     *
      * @return mixed
      */
     public function getCompilations($category)
@@ -274,6 +310,8 @@ class RestApi
     }
 
     /**
+     * @throws RemoteException
+     *
      * @return mixed
      */
     public function updateMovies()
@@ -296,7 +334,23 @@ class RestApi
 
     /**
      * @param string $url
+     *
+     * @return string
+     */
+    private function getCompleteUrl($url)
+    {
+        if (substr($url, 0, 1) === '/') {
+            $url = substr($url, 1);
+        }
+
+        return sprintf('%s/%s', $this->baseUrl, $url);
+    }
+
+    /**
+     * @param string $url
      * @param array  $args
+     *
+     * @throws RemoteException
      *
      * @return mixed
      */
@@ -306,7 +360,8 @@ class RestApi
             die('Sorry cURL is not installed!');
         }
 
-        $url = $this->baseUrl.$url;
+        $url = $this->getCompleteUrl($url);
+
         $queryString = "?";
         foreach ($args as $argName => $argVal) {
             $queryString .= $argName."=".urlencode($argVal)."&";
@@ -351,6 +406,8 @@ class RestApi
      * @param string $args
      * @param int    $timeout
      *
+     * @throws RemoteException
+     *
      * @return mixed
      */
     private function curlPost($url, $args = "", $timeout = 10)
@@ -359,7 +416,7 @@ class RestApi
             die('Sorry cURL is not installed!');
         }
 
-        $url = $this->baseUrl.$url;
+        $url = $this->getCompleteUrl($url);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -390,18 +447,21 @@ class RestApi
             die('Sorry cURL is not installed!');
         }
 
-        $url = $this->baseUrl.$url;
+        $url = $this->getCompleteUrl($url);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HTTPGET, true);
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_NOBODY, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         $output = curl_exec($ch);
+
         if ($output === false) {
             return false;
         }
+
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 

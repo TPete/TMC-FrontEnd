@@ -26,9 +26,9 @@ class ShowController extends AbstractController
 
             $url = "http://".$this->host.'/shows/'.$category.'/'.$id;
 
-            return $response->withRedirect($url, 302);
-        } catch (RemoteException $exp) {
-            return Util::renderException($exp, $this->host, $this->container, $response);
+            return $response->withRedirect($url);
+        } catch (RemoteException $e) {
+            return Util::renderException($e, $this->host, $this->container, $response);
         }
     }
 
@@ -44,15 +44,15 @@ class ShowController extends AbstractController
     {
         try {
             $data = $this->api->getEpisodeDescription($category, $id);
-            $data['link'] = $_GET['link'];
+            $data['link'] = $request->getQueryParam('link');
 
             return $this->twig->render(
                 $response,
                 "shows/details/episodeDetailsAjax.html.twig",
                 $data
             );
-        } catch (RemoteException $exp) {
-            return Util::renderException($exp, $this->host, $this->container, $response);
+        } catch (RemoteException $e) {
+            return Util::renderException($e, $this->host, $this->container, $response);
         }
     }
 
@@ -82,8 +82,8 @@ class ShowController extends AbstractController
                     'categories'     => $this->getNavigationCategories(),
                 ]
             );
-        } catch (RemoteException $exp) {
-            return Util::renderException($exp, $this->host, $this->container, $response);
+        } catch (RemoteException $e) {
+            return Util::renderException($e, $this->host, $this->container, $response);
         }
     }
 
@@ -118,8 +118,8 @@ class ShowController extends AbstractController
                     'categories'     => $this->getNavigationCategories(),
                 ]
             );
-        } catch (RemoteException $exp) {
-            return Util::renderException($exp, $this->host, $this->container, $response);
+        } catch (RemoteException $e) {
+            return Util::renderException($e, $this->host, $this->container, $response);
         }
     }
 }

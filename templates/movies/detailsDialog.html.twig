@@ -1,0 +1,62 @@
+<div class="container-fluid mt-1">
+    <div class="row">
+        <div class="col-6">
+            <img src="{{ movie.poster_big }}" class="img-fluid w-90 mx-auto mb-0 d-block">
+        </div>
+        <div class="col-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        Beschreibung
+                    </h5>
+                </div>
+                <div id="collapseOne">
+                    <div class="card-body">
+                        {{ movie.overview }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        Darsteller
+                    </h5>
+                </div>
+                <div id="collapseTwo">
+                    <div class="card-body">
+                        {% for actor in movie.actors %}
+                            <a href="?filter={{ actor }}" class="btn btn-outline-info mb-1" title="Nach {{ actor|raw }} suchen" data-toggle="tooltip">{{ actor|raw }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        Info
+                    </h5>
+                </div>
+                <div id="collapseThree">
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-md-3 text-nowrap">Jahr / Land / Info</dt>
+                            <dd class="col-md-9">{{ '%s / %s / %s'|format(movie.year, movie.countries|join(', '), movie.info)|raw }}</dd>
+                            <dt class="col-md-3">Regie</dt>
+                            <dd class="col-md-9">
+                                <a href="?filter={{ movie.director|url_encode }}" class="btn btn-outline-info" title="Nach {{ movie.director }} suchen" data-toggle="tooltip">{{ movie.director }}</a>
+                            </dd>
+                            <dt class="col-md-3">Genres</dt>
+                            <dd class="col-md-9">
+                                {% for genre in movie.genres %}
+                                    <a href="?genres={{ genre }}" class="btn btn-outline-info mb-1" title="Nach {{ genre }} suchen" data-toggle="tooltip">{{ genre }}</a>
+                                {% endfor %}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
