@@ -66,19 +66,6 @@ class RestApi
     }
 
     /**
-     * @throws RemoteException
-     *
-     * @return mixed
-     */
-    public function getCategories()
-    {
-        $url = "/categories/";
-        $res = $this->curlDownload($url);
-
-        return $res;
-    }
-
-    /**
      * @param string $type
      * @param array  $args
      *
@@ -108,6 +95,67 @@ class RestApi
     }
 
     /**
+     * @deprecated
+     *
+     * @throws RemoteException
+     *
+     * @return mixed
+     */
+    public function getCategories()
+    {
+        $url = "/categories/";
+        $res = $this->curlDownload($url);
+
+        return $res['data'];
+    }
+
+    /**
+     * Get categories for the series area.
+     *
+     * @throws RemoteException
+     *
+     * @return array
+     */
+    public function getSeriesCategories()
+    {
+        $url = "/areas/series/categories/";
+        $res = $this->curlDownload($url);
+        $res = array_map(function (array $row) {
+            return $row['id'];
+        }, $res);
+
+        return $res;
+    }
+
+    /**
+     * Get categories for the movies area.
+     *
+     * @throws RemoteException
+     *
+     * @return array
+     */
+    public function getMovieCategories()
+    {
+        $url = "/areas/movies/categories/";
+        $res = $this->curlDownload($url);
+        $res = array_map(function (array $row) {
+            return $row['id'];
+        }, $res);
+
+        return $res;
+    }
+
+    /**
+     * @throws RemoteException
+     *
+     * @return mixed
+     */
+    public function updateShows()
+    {
+        return $this->curlPost("/areas/series/maintenance/", "", 720);
+    }
+
+    /**
      * @param string $category
      *
      * @throws RemoteException
@@ -116,58 +164,36 @@ class RestApi
      */
     public function getCategoryOverview($category)
     {
-        $url = "/shows/".$category."/";
-        $list = $this->curlDownload($url);
-
-        return $list;
+        return $this->curlDownload(sprintf("/areas/series/categories/%s/", $category));
     }
 
     /**
      * @param string $category
-     * @param int    $id
-     *
-     * @throws RemoteException
+     * @param int    $showId
      *
      * @return mixed
+     *@throws RemoteException
+     *
      */
-    public function getShowDetails($category, $id)
+    public function getShowDetails($category, $showId)
     {
-        $url = "/shows/".$category."/".$id."/";
-        $details = $this->curlDownload($url);
-
-        return $details;
+        return $this->curlDownload(sprintf("/areas/series/categories/%s/entries/%s/", $category, $showId));
     }
 
     /**
      * @param string $category
-     * @param int    $id
-     *
-     * @throws RemoteException
-     *
-     * @return mixed
-     */
-    public function getEpisodeDescription($category, $id)
-    {
-        $url = "/shows/".$category."/episodes/".$id."/";
-        $description = $this->curlDownload($url);
-
-        return $description;
-    }
-
-    /**
-     * @param string $category
-     * @param int    $id
+     * @param int    $showId
      * @param string $title
      * @param string $tvdbId
      * @param string $lang
      *
-     * @throws RemoteException
-     *
      * @return mixed
+     *@throws RemoteException
+     *
      */
-    public function updateShowDetails($category, $id, $title, $tvdbId, $lang)
+    public function updateShowDetails($category, $showId, $title, $tvdbId, $lang)
     {
-        $url = "/shows/".$category."/edit/".$id."/";
+        $url = sprintf("/shows/categories/%s/shows/%s/", $category, $showId);
         $args = [
             "title"  => $title,
             "tvdbId" => $tvdbId,
@@ -179,32 +205,20 @@ class RestApi
     }
 
     /**
-     * @throws RemoteException
-     *
-     * @return mixed
-     */
-    public function updateShows()
-    {
-        $url = "/shows/maintenance/";
-        $result = $this->curlPost($url, "", 720);
-
-        return $result;
-    }
-
-    /**
      * @param string $category
-     * @param int    $id
-     *
-     * @throws RemoteException
+     * @param int    $showId
+     * @param int    $episodeId
      *
      * @return mixed
+     * @throws RemoteException
+     *
      */
-    public function getMovie($category, $id)
+    public function getEpisodeDescription($category, $showId, $episodeId)
     {
-        $url = "/movies/".$category."/".$id."/";
-        $res = $this->curlDownload($url);
+        $url = sprintf("/shows/categories/%s/shows/%s/episodes/%s/", $category, $showId, $episodeId);
+        $description = $this->curlDownload($url);
 
-        return $res;
+        return $description;
     }
 
     /**
@@ -216,10 +230,17 @@ class RestApi
      */
     public function lookupMovie($id)
     {
-        $url = "/movies/lookup/".$id."/";
-        $res = $this->curlDownload($url);
+        return $this->curlDownload(sprintf("/areas/movies/lookup/%s/", $id));
+    }
 
-        return $res;
+    /**
+     * @throws RemoteException
+     *
+     * @return mixed
+     */
+    public function updateMovies()
+    {
+        return $this->curlPost("/areas/movies/maintenance/", "", 720);
     }
 
     /**
@@ -230,50 +251,58 @@ class RestApi
      * @param string $filter
      * @param string $genres
      * @param string $collection
-     * @param string $list
      *
      * @throws RemoteException
      *
      * @return mixed
      */
-    public function getMovies($category, $sort, $cnt, $offset, $filter = "", $genres = "", $collection = "0", $list = "0")
+    public function getMovies($category, $sort, $cnt, $offset, $filter = "", $genres = "", $collection = "0")
     {
-        $url = "/movies/".$category."/";
-        $args = [
-            "sort"       => $sort,
-            "cnt"        => $cnt,
-            "offset"     => $offset,
-            "filter"     => $filter,
-            "genre"      => $genres,
-            "collection" => $collection,
-            "list"       => $list,
-        ];
-        $res = $this->curlDownload($url, $args);
-
-        return $res;
+        return $this->curlDownload(
+            sprintf("/areas/movies/categories/%s/", $category),
+            [
+                "sort"       => $sort,
+                "count"        => $cnt,
+                "offset"     => $offset,
+                "filter"     => $filter,
+                "genre"      => $genres,
+                "collection" => $collection,
+            ]
+        );
     }
 
     /**
      * @param string $category
-     * @param int    $dbId
-     * @param string $movieDbId
+     * @param int    $movieId
+     *
+     * @return mixed
+     * @throws RemoteException
+     *
+     */
+    public function getMovie($category, $movieId)
+    {
+        return $this->curlDownload(sprintf("/areas/movies/categories/%s/movies/%s/", $category, $movieId));
+    }
+
+    /**
+     * @param string $category
+     * @param int    $localId
+     * @param string $remoteId
      * @param string $filename
      *
      * @throws RemoteException
      *
-     * @return mixed
+     *@return mixed
      */
-    public function updateMovie($category, $dbId, $movieDbId, $filename)
+    public function updateMovie($category, $localId, $remoteId, $filename)
     {
-        $url = "/movies/".$category."/".$dbId."/";
-        $args = [
-            "movieDbId" => $movieDbId,
-            "filename"  => $filename,
-        ];
-
-        $res = $this->curlPost($url, $args);
-
-        return $res;
+        return $this->curlPost(
+            sprintf("/areas/movies/categories/%s/movies/%s/", $category, $localId),
+            [
+                "remoteId" => $remoteId,
+                "filename"  => $filename,
+            ]
+        );
     }
 
     /**
@@ -286,12 +315,7 @@ class RestApi
      */
     public function getGenres($category, $term = '')
     {
-        $url = "/movies/".$category."/genres/";
-        $args = ["term" => $term];
-
-        $res = $this->curlDownload($url, $args);
-
-        return $res;
+        return $this->curlDownload(sprintf("/areas/movies/categories/%s/genres/", $category), ["term" => $term]);
     }
 
     /**
@@ -301,25 +325,9 @@ class RestApi
      *
      * @return mixed
      */
-    public function getCompilations($category)
+    public function getCollections($category)
     {
-        $url = "/movies/".$category."/compilations/";
-        $res = $this->curlDownload($url);
-
-        return $res;
-    }
-
-    /**
-     * @throws RemoteException
-     *
-     * @return mixed
-     */
-    public function updateMovies()
-    {
-        $url = "/movies/maintenance/";
-        $result = $this->curlPost($url, "", 720);
-
-        return $result;
+        return $this->curlDownload(sprintf("/areas/movies/categories/%s/collections/", $category));
     }
 
     /**
@@ -328,8 +336,7 @@ class RestApi
      */
     private function raiseException($e)
     {
-        $exp = new RemoteException($e["error"], $e["trace"]);
-        throw $exp;
+        throw new RemoteException($e["error"], $e["trace"]);
     }
 
     /**

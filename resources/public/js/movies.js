@@ -84,10 +84,6 @@ var Movies = (function(bootbox) {
         $(window)
             .on('scroll', function (e) {
                 var diff = container.height() - $(window).height() - window.scrollY;
-                console.log(container.height());
-                console.log($(window).height());
-                console.log(e.originalEvent);
-
 
                 if (false === lock && diff < 0.3 * container.height()) {
                     lock = true;
@@ -121,8 +117,8 @@ var Movies = (function(bootbox) {
                             type: 'get',
                             success: function (response) {
                                 if (response.status === 'Ok') {
-                                    $('#previewTitle').html(response.data.title);
-                                    $('#previewOverview').html(response.data.overview);
+                                    $('#previewTitle').html(response.data.attributes.title);
+                                    $('#previewOverview').html(response.data.attributes.overview);
 
                                     $('#preview').show();
 

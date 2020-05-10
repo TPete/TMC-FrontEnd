@@ -8,11 +8,11 @@
                 <li class="nav-item">
                     <a class="navbar-brand" href="http://{{ host }}">TV</a>
                 </li>
-                {% for type in categories %}
-                    {% for link, label in type %}
+                {% for key, area in categories %}
+                    {% for category in area %}
                         <li class="nav-item">
-                            <a class="nav-link" href="http://{{ host }}/{{ link }}">
-                                {{ label }}
+                            <a class="nav-link" href="http://{{ host ~ '/' ~ key ~ '/' ~ category }}">
+                                {{ category }}
                             </a>
                         </li>
                     {% endfor %}

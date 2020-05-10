@@ -1,20 +1,19 @@
 {% for movie in movies %}
     {% include "movies/movieCard.html.twig" with {
         'id': movie['id'],
-        'movie_db_id': movie['movie_db_id'],
-        'poster': movie['poster'],
-        'poster_big': movie['poster_big'],
-        'title': movie['title'],
-        'overview': movie['overview'],
-        'poster': movie['poster'],
-        'year': movie['release_date']|slice(0, 4),
-        'countries': movie['countries'],
-        'genres': movie['genres']|slice(0, 3),
-        'actors': movie['actors']|slice(0, 3),
-        'director': movie['director'],
-        'info': movie['info'],
-        'filename': movie['filename'],
-        'collection_id': movie['collection_id'],
-        'collection_name': movie['collection_name']
+        'movie_db_id': movie['attributes']['movie_db_id'],
+        'poster': movie['attributes']['poster'],
+        'poster_big': movie['attributes']['poster_big'],
+        'title': movie['attributes']['title'],
+        'overview': movie['attributes']['overview'],
+        'year': movie['attributes']['release_date']|slice(0, 4),
+        'countries': movie['attributes']['countries']|slice(0, 3),
+        'genres': movie['attributes']['genres']|slice(0, 3),
+        'actors': movie['attributes']['actors']|slice(0, 3),
+        'directors': movie['attributes']['directors'],
+        'info': movie['attributes']['info'],
+        'filename': movie['attributes']['filename'],
+        'collection_id': movie['attributes']['collection_id'],
+        'collection_name': movie['attributes']['collection_name']
     } %}
 {% endfor %}

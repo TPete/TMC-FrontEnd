@@ -1,6 +1,6 @@
 <div class="row movie-row">
     <div class="col-xs-12 col-sm-6 col-md-3 cursor-hand">
-        <img src="{{ poster }}" class="img-fluid" data-toggle="movie-poster"
+        <img src="{{ poster }}" class="img-fluid" data-toggle="movie-poster" alt="Movie Poster"
         data-url="{{ poster_big }}" data-id="{{ id }}">
     </div>
     <div class="col-xs-12 col-sm-6 col-md-9">
@@ -17,11 +17,6 @@
                         <a href="?collection={{ collection_id }}" class="btn btn-outline-info" title="Nach Filmen der {{ collection_name }} suchen" data-toggle="tooltip">{{ collection_name }}</a>
                     </p>
                 {% endif %}
-                {#{% for list in lists %}#}
-                    {#<p>#}
-                        {#Teil der <a href="?list={{ list["list_id"] }}">{{ list["list_name"] }}</a> Liste#}
-                    {#</p>#}
-                {#{% endfor %}#}
             </div>
             <div class="movie-card-footer">
                 <div class="row">
@@ -35,7 +30,9 @@
                             </dd>
                             <dt class="col-md-3">Regie</dt>
                             <dd class="col-md-9">
-                                <a href="?filter={{ director|url_encode }}" class="btn btn-outline-info" title="Nach {{ director }} suchen" data-toggle="tooltip">{{ director }}</a>
+                                {% for director in directors %}
+                                    <a href="?filter={{ director|url_encode }}" class="btn btn-outline-info" title="Nach {{ director }} suchen" data-toggle="tooltip">{{ director }}</a>
+                                {% endfor %}
                             </dd>
                             <dt class="col-md-3">Genres</dt>
                             <dd class="col-md-9">
@@ -48,7 +45,7 @@
                     <div class="col-md-6">
                         <dl class="row mb-0">
                             <dt class="col-md-4 text-nowrap">Jahr / Land / Info</dt>
-                            <dd class="col-md-8">{{ '%s / %s / %s'|format(year, countries, info)|raw }}</dd>
+                            <dd class="col-md-8">{{ '%s / %s / %s'|format(year, countries|join(', '), info)|raw }}</dd>
                         </dl>
                         <a href="{{ filename }}" class="btn btn-primary w-25">
                             <i class="fa fa-play"></i>

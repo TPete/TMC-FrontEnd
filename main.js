@@ -9,29 +9,36 @@ sections["shows"] = (function(){
 		.off('click')
 		.on('click', function(){
 			var category = sections.getSubCategory(),
-				id,
+				showId = sections.getId(),
+				episodesId,
 				link;
 			$('#episode-details').show();
 			$('.episode-link-present, .episode-link-missing').removeClass('selected');
 			$(this).addClass('selected');
 			$('#episode-play-link').remove();
-			id = $(this).find('a').data('id');
+			episodesId = $(this).find('a').data('id');
 			if ($(this).hasClass('episode-link-present')){
 				link = $(this).find('a').data('href');
 				$(this).prepend("<a id='episode-play-link' href='" + link + "' target='_blank' title='Play'><i class='fa fa-play'></i></a>");
 			}
-			$.ajax({
-				url: 'http://' + host + '/shows/' + category + '/episodes/' + id + '/',
-                data: {
-				    link: link
-                },
-				success: function(data){
-					$('#episode-details').html(data);
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					alert(errorThrown);
-				}
-			});
+			$('#episode-details-description').html($(this).find('a.episode-link').data('description'));
+			$('#episode-details-title').html($(this).find('a.episode-link').data('title'));
+			$('#episode-details-number').html($(this).find('a.episode-link').data('id'));
+
+			console.log($(this).find('a').data('description'));
+
+			// $.ajax({
+			// 	url: 'http://' + host + '/shows/' + category + '/shows/' + showId + '/episodes/' + episodesId + '/',
+            //     data: {
+			// 	    link: link
+            //     },
+			// 	success: function(data){
+			// 		$('#episode-details').html(data);
+			// 	},
+			// 	error: function(jqXHR, textStatus, errorThrown){
+			// 		alert(errorThrown);
+			// 	}
+			// });
 		});
 
         $('.container-fluid')

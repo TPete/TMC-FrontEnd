@@ -28,17 +28,6 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-3 col-form-label" for="list">Listen</label>
-                            <div class="col-sm-9">
-                                <select class="form-control" name="list" id="list">
-                                    <option value=""></option>
-                                    {% for row in listOptions %}
-                                        <option value="{{ row["id"] }}" {% if row['id'] == list %}selected="selected"{% endif %}>{{ row["name"] }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group row">
                             <label class="col-sm-3 col-form-label" for="collection">Reihen</label>
                             <div class="col-sm-9">
                                 <select class="form-control" name="collection" id="collection">

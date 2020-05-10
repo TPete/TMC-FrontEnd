@@ -28,18 +28,21 @@ class MovieController extends AbstractController
             $genre = $request->getQueryParam('genre');
             $offset = intval($request->getQueryParam('offset', 0));
             $collection = intval($request->getQueryParam('collection', 0));
-            $list = intval($request->getQueryParam('list', 0));
             $fetchSize = self::FETCH_SIZE;
 
-            if ($collection > 0 or $list > 0) {
+            if ($collection > 0) {
                 $filter = '';
                 $genre = '';
                 $sort = 'name_asc';
             }
 
-            $movies = $this->api->getMovies($category, $sort, $fetchSize, $offset, $filter, $genre, $collection, $list);
-            $comp = $this->api->getCompilations($category);
-            $genreOptions = $this->api->getGenres($category);
+            $movies = $this->api->getMovies($category, $sort, $fetchSize, $offset, $filter, $genre, $collection);
+            $collectionsOptions = array_map(function ($resource) {
+                return ['id' => $resource['id'], 'name' => $resource['attributes']['name']];
+            }, $this->api->getCollections($category)); //TODO use models for api response
+            $genreOptions = array_map(function ($resource) {
+                return $resource['id'];
+            }, $this->api->getGenres($category)); //TODO use models for api response
 
             $data = [
                 'header' => $category,
@@ -51,13 +54,11 @@ class MovieController extends AbstractController
                 'title' => $category,
                 'fetchSize' => $fetchSize,
                 'category' => $category,
-                'movies' => $movies['list'],
+                'movies' => $movies,
                 'genre' => $genre,
                 'genreOptions' => $genreOptions,
                 'collection' => $collection,
-                'collectionOptions' => $comp['collections'],
-                'list' => $list,
-                'listOptions' => $comp['lists'],
+                'collectionOptions' => $collectionsOptions,
             ];
 
             if ($request->isXhr()) {
@@ -101,7 +102,7 @@ class MovieController extends AbstractController
             } else {
                 return $response->withJson([
                     'status' => 'Ok',
-                    'title' => $movie['title'],
+                    'title' => $movie['attributes']['title'],
                     'template' => $this->twig->fetch('movies/detailsDialog.html.twig', ['movie' => $movie]),
                 ]);
             }
@@ -155,53 +156,23 @@ class MovieController extends AbstractController
      * @param Response $response
      * @param string   $category
      * @param int      $id
-     */
-    public function editAction(Request $request, Response $response, $category, $id)
-    {
-        throw new \Exception('Gibt es nicht mehr');
-//
-//        try {
-//            $movie  = $this->api->getMovie($category, $id);
-//            $output = $request->getQueryParam('output', 'html');
-//
-//            if ($output === 'html') {
-//                $movie['path']     = $movie['filename'];
-//                $movie['filename'] = substr($movie['filename'], strrpos($movie['filename'], '/') + 1);
-//
-//                $this->twig->render($response, 'movies/movieCard.html.twig', $movie);
-//            }
-//            if ($output === 'edit') {
-//                $movieDbId = $movie['movie_db_id'];
-//                $this->twig->render(
-//                    $response,
-//                    'movies/movieDetailsDialog.html.twig',
-//                    [
-//                        'data'        => $movie,
-//                        'movie_db_id' => $movieDbId,
-//                    ]
-//                );
-//            }
-//        } catch (RemoteException $exp) {
-//            Util::renderException($exp, $this->host, $this->container, $response);
-//        }
-    }
-
-    /**
-     * @param Request  $request
-     * @param Response $response
-     * @param string   $category
-     * @param int      $id
      *
      * @return ResponseInterface
      */
     public function updateMovieAction(Request $request, Response $response, $category, $id)
     {
         try {
-            $json = $this->api->updateMovie($category, $id, $_POST['movieDbId'], $_POST['filename']);
+            $details = $this->api->updateMovie($category, $id, $_POST['movieDbId'], $_POST['filename']);
 
-            return $response->withJson($json);
+            if (isset($details['type']) && $details['type'] === 'movie') {
+                $data = ['status' => 'Ok'];
+            } else {
+                $data = ['status' => 'Error'];
+            }
+
+            return $response->withJson($data);
         } catch (RemoteException $exp) {
-            Util::renderException($exp, $this->host, $this->container, $response);
+            return Util::renderException($exp, $this->host, $this->container, $response);
         }
     }
 }

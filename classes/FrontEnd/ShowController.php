@@ -36,14 +36,15 @@ class ShowController extends AbstractController
      * @param Request  $request
      * @param Response $response
      * @param string   $category
-     * @param string   $id
+     * @param int      $showId
+     * @param int      $episodeId
      *
      * @return ResponseInterface
      */
-    public function getEpisodeDescriptionAction(Request $request, Response $response, $category, $id)
+    public function getEpisodeDescriptionAction(Request $request, Response $response, $category, $showId, $episodeId)
     {
         try {
-            $data = $this->api->getEpisodeDescription($category, $id);
+            $data = $this->api->getEpisodeDescription($category, $showId, $episodeId);
             $data['link'] = $request->getQueryParam('link');
 
             return $this->twig->render(
@@ -99,23 +100,23 @@ class ShowController extends AbstractController
     {
         try {
             $data   = $this->api->getShowDetails($category, $id);
-            $title  = $data["title"];
+            $title  = $data['attributes']["title"];
             $target = $this->host."/shows/".$category."/";
 
             return $this->twig->render(
                 $response,
                 'shows/details/page.html.twig',
                 [
-                    'host'           => $this->host,
-                    'title'          => $title,
-                    'target'         => $target,
-                    'overview'       => $data,
+                    'host' => $this->host,
+                    'title' => $title,
+                    'target' => $target,
+                    'overview' => $data,
                     'showEditButton' => true,
-                    'imageUrl'       => $data['imageUrl'],
-                    'showData'       => $data['seasons'],
-                    "tvdbId"         => $data["tvdbId"],
-                    "url"            => "http://".$this->host.'/shows/'.$category.'/'.$id.'/',
-                    'categories'     => $this->getNavigationCategories(),
+                    'imageUrl' => $data['attributes']['background'],
+                    'seasons' => $data['included'],
+                    "tvdbId" => $data['attributes']["tvdbId"],
+                    "url" => "http://".$this->host.'/shows/'.$category.'/'.$id.'/',
+                    'categories' => $this->getNavigationCategories(),
                 ]
             );
         } catch (RemoteException $e) {

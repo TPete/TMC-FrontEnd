@@ -9,20 +9,23 @@
         </ul>
     {% endif %}
     <ul id='season-list' class="col-md-5 col-sm-6 {% if showData|length > 1 %}mt-5{% endif %}">
-        {% for season in showData %}
+        {% for season in seasons %}
         <li>
-            <span class='season-title' id="{{ season["title"]  }}-link">
-                {{ season["title"] }}
+            <span class='season-title' id="{{ season["id"]  }}-link">
+                Staffel {{ season["id"] }}
             </span>
             <ul class='episode-list'>
-                {% for episode in season["episodes"] %}
-                    {% set class = episode["link"] is not empty ? "episode-link-present" : "episode-link-missing" %}
-                    {% set link = episode["link"] is not empty ? episode["link"] : "" %}
+                {% for episode in season["included"] %}
+                    {% set class = episode["attributes"]["url"] is not empty ? "episode-link-present" : "episode-link-missing" %}
+                    {% set link = episode["attributes"]["url"] is not empty ? episode["attributes"]["url"] : "" %}
 
-                    <li class="{{  class }}">
-                        <a class="episode-link" href='javascript:void(0)' title='{{ episode["label"]  }}'
-                           data-id='{{ episode["id"] }}' data-href='{{ link }}'>
-                            {{ episode["label"] }}
+                    <li class="{{ class }}">
+                        <a class="episode-link" href="javascript:void(0)" title="{{ episode["attributes"]["title"] }}"
+                           data-id="{{ episode["id"] }}" data-href="{{ link }}"
+                           data-description="{{ episode["attributes"]["description"] }}"
+                           data-title="{{ episode["attributes"]["title"] }}"
+                        >
+                            {{ episode["id"] }} - {{ episode["attributes"]["title"] }}
                         </a>
                     </li>
                 {% endfor %}
@@ -32,6 +35,25 @@
     </ul>
     <div id="episode-details-wrapper" class="offset-md-5 col-md-7 offset-sm-6 col-sm-6 hidden-xs-down fixed-top">
         <div id="episode-details">
+            <div class="card">
+                <div class="card-header d-flex">
+                    <div>
+                        <h4 class="card-title" id="episode-details-title"></h4>
+                        <h6 class="card-subtitle text-muted">Folge <span id="episode-details-number"></span></h6>
+                    </div>
+                    <a id="episode-details-close-btn" href="#" class="link-secondary ml-auto">
+                        <i class="fa fa-close fa-2x"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <p class="card-text" id="episode-details-description">{{ description }}</p>
+                    {% if link is not null %}
+                        <a href="{{ link }}" class="btn btn-primary float-right">
+                            <i class="fa fa-play"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>

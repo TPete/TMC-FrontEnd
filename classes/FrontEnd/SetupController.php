@@ -170,21 +170,42 @@ class SetupController extends AbstractController
      * @param Request  $request
      * @param Response $response
      * @param string   $type
+     *
+     * @return ResponseInterface
      */
     public function updateLibraryAction(Request $request, Response $response, $type)
     {
         try {
             if ($type === 'movies') {
-                $res = $this->api->updateMovies();
-
-                echo $res['protocol'];
+                $result = $this->api->updateMovies();
             } elseif ($type === 'shows') {
-                $res = $this->api->updateShows();
-
-                echo $res['protocol'];
+                $result = $this->api->updateShows();
+            } else {
+                return $response->withStatus(404);
             }
+
+            $response = [];
+
+            foreach ($result as $maintenance) {
+                $category = $maintenance['id'];
+                $response[] = $category;
+                $steps = $maintenance['attributes']['steps'];
+
+                foreach ($steps as $step) {
+                    $response[] = '-------------';
+                    $response[] = sprintf('%s: %s', $step['description'], $step['success'] ? 'Ok' : 'Failed');
+
+                    foreach ($step['protocol'] as $row) {
+                        $response[] = '---'.print_r($row, true);
+                    }
+                }
+            }
+
+            //TODO add template
+            //TODO check result
+            return implode('<br>', $response);
         } catch (RemoteException $exp) {
-            Util::renderException($exp, $this->host, $this->container, $response);
+            return Util::renderException($exp, $this->host, $this->container, $response);
         }
     }
 }

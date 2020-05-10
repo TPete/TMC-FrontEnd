@@ -1,7 +1,7 @@
 <div class="container-fluid mt-1">
     <div class="row">
         <div class="col-6">
-            <img src="{{ movie.poster_big }}" class="img-fluid w-90 mx-auto mb-0 d-block">
+            <img src="{{ movie.attributes.poster_big }}" class="img-fluid w-90 mx-auto mb-0 d-block" alt="Movie Poster">
         </div>
         <div class="col-6">
             <div class="card mb-4">
@@ -12,7 +12,7 @@
                 </div>
                 <div id="collapseOne">
                     <div class="card-body">
-                        {{ movie.overview }}
+                        {{ movie.attributes.overview }}
                     </div>
                 </div>
             </div>
@@ -25,7 +25,7 @@
                 </div>
                 <div id="collapseTwo">
                     <div class="card-body">
-                        {% for actor in movie.actors %}
+                        {% for actor in movie.attributes.actors %}
                             <a href="?filter={{ actor }}" class="btn btn-outline-info mb-1" title="Nach {{ actor|raw }} suchen" data-toggle="tooltip">{{ actor|raw }}</a>
                         {% endfor %}
                     </div>
@@ -42,16 +42,19 @@
                     <div class="card-body">
                         <dl class="row mb-0">
                             <dt class="col-md-3 text-nowrap">Jahr / Land / Info</dt>
-                            <dd class="col-md-9">{{ '%s / %s / %s'|format(movie.year, movie.countries|join(', '), movie.info)|raw }}</dd>
+                            <dd class="col-md-9">{{ '%s / %s / %s'|format(movie.attributes.release_date|slice(0, 4), movie.attributes.countries|join(', '), movie.attributes.info)|raw }}</dd>
                             <dt class="col-md-3">Regie</dt>
                             <dd class="col-md-9">
-                                <a href="?filter={{ movie.director|url_encode }}" class="btn btn-outline-info" title="Nach {{ movie.director }} suchen" data-toggle="tooltip">{{ movie.director }}</a>
+                                {% for director in movie.attributes.directors %}
+                                    <a href="?filter={{ director|url_encode }}" class="btn btn-outline-info" title="Nach {{ director }} suchen" data-toggle="tooltip">{{ director }}</a>
+                                {% endfor %}
                             </dd>
                             <dt class="col-md-3">Genres</dt>
                             <dd class="col-md-9">
-                                {% for genre in movie.genres %}
+                                {% for genre in movie.attributes.genres %}
                                     <a href="?genres={{ genre }}" class="btn btn-outline-info mb-1" title="Nach {{ genre }} suchen" data-toggle="tooltip">{{ genre }}</a>
                                 {% endfor %}
+                            </dd>
                             </dd>
                         </dl>
                     </div>
